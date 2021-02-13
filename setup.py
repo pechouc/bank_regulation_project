@@ -9,7 +9,7 @@ setup(name='bank_regulation_project',
       version="1.0",
       description="Project Description",
       packages=find_packages(),
-      test_suite = 'tests',
-      # include_package_data: to install data from MANIFEST.in
+      test_suite='tests',
+      # Include_package_data: to install data from MANIFEST.in
       include_package_data=True,
       zip_safe=False)

@@ -52,7 +52,6 @@ class TypicalBank:
             # If condition is not satisfied, the bank first chooses the bad asset management technology
             self.technology_choices = ['bad']
 
-
     def generate_cash_flows(self, n_periods=200, dt=0.01, random_seed=None, verbose=0):
         """
         This method allows to simulate the cash flows of the bank.
@@ -123,7 +122,6 @@ class TypicalBank:
         if verbose:
             print('Cash-flow and technology choice attributes were updated.')
 
-
     def plot_cash_flows(self):
         """
         This method allows to rapidly plot the cash flows of the bank.
@@ -138,7 +136,6 @@ class TypicalBank:
         # We simply output a lineplot of the bank's cash flows (the x-axis corresponding to periods)
         plt.plot(self.cash_flows)
         plt.show()
-
 
     def has_shirked(self):
         """
@@ -155,7 +152,6 @@ class TypicalBank:
         can potentially induce the bank to choose the bad technology from start.
         """
         return ('bad' in self.technology_choices)
-
 
 
 class Economy:
@@ -233,7 +229,6 @@ class Economy:
         # This attribute is eventually "filled" within the apply_first_best_closure method
         self.a_G = None
 
-
     def get_one_bank(self, x_0=10):
         """
         This method allows to instantiate a bank, using economy-wide parameters.
@@ -246,7 +241,6 @@ class Economy:
                            b=self.b, r=self.r,
                            mu_G=self.mu_G, sigma_G=self.sigma_G,
                            mu_B=self.mu_B, sigma_B=self.sigma_B)
-
 
     def run_simulation(self, n_banks=100,
                        lower_x_0=2, higher_x_0=5,
@@ -299,37 +293,35 @@ class Economy:
         else:
             return df.set_index('bank_id')
 
-
     def apply_first_best_closure(self, inplace=True, verbose=1):
         if self.simulation is None:
             raise Exception('You need to first run a simulation before applying first-best closure.')
 
         self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-                   np.sqrt(((self.mu_G / (self.sigma_G ** 2))  - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
         threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
 
         self.simulation['first_best_closure'] =\
-                 self.simulation.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
+            self.simulation.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
 
         if verbose:
             print('Simulation attribute (DataFrame) updated with the first best closure column.')
 
-
     def apply_capital_requirements(self, inplace=True, verbose=1):
         if self.a_G is None:
             self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-                       np.sqrt(((self.mu_G / (self.sigma_G ** 2))  - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
         self.nu_B = 1 / (self.r - self.mu_B)
 
         self.a_B = (1/2) + (self.mu_B / (self.sigma_B ** 2)) +\
-                   np.sqrt(((self.mu_B / (self.sigma_B ** 2))  - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
+            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
 
         threshold = ((self.a_G - 1) * self.b + self.a_G - self.a_B) / (self.a_G * self.nu_G - self.a_B * self.nu_B)
 
         self.simulation['capital_requirements_closure'] =\
-                 self.simulation.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
+            self.simulation.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
 
         if verbose:
             print('Simulation attribute (DataFrame) updated with the "capital_requirements_closure" column.')
