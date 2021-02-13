@@ -1,0 +1,3 @@
+graft bank_regulation_project
+global-exclude *.py[cod] __pycache__ *.so *.ipynb
+recursive-exclude  bank_regulation_project/jupy *
