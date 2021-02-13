@@ -243,55 +243,128 @@ class Economy:
                            mu_B=self.mu_B, sigma_B=self.sigma_B)
 
     def run_simulation(self, n_banks=100,
-                       lower_x_0=2, higher_x_0=5,
+                       lower_x_0=2, upper_x_0=5,
                        n_periods=200, dt=0.01,
                        fix_random_state=False,
                        inplace=True):
         """
+        This method is the core simulation method provided by the Economy class.
 
+        It requires several arguments:
+
+        - n_banks: the number of banks to include in the simulation;
+
+        - lower_x_0: the lower bound for the support of the uniform distribution that determines the initial cash flow
+        level of each bank;
+
+        - upper_x_0: the upper bound for the support of the uniform distribution that determines the initial cash flow
+        level of each bank;
+
+        - n_periods: the number of periods during which one wants to simulate the banks' cash flows;
+
+        - dt: the timestep to be used when generating banks' cash flows using geometric Brownian motions;
+
+        - fix_random_state: boolean that indicates whether to fix or not the random state of the simulation. If set to
+        True, the output of the method will be the same through a call to another; if set to False, different calls will
+        of the method will yield different outputs;
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified.
+
+        Based on these arguments and using the generate_cash_flows method of TypicalBank instances, this method instan-
+        tiate a number of banks, simulates their cash flows and determines whether they have shirked or their assets
+        have reached a negative net present value at some point in time.
+
+        It returns a DataFrame:
+
+        - indexed by banks' ID, which range from 1 to n_banks;
+
+        - whose n_periods first columns (called "cf_0", "cf_1", etc) store the cash flow levels of each bank at each
+        point in time;
+
+        - with an additional "has_shirked" column which indicates whether the bank has chosen the bad technology at some
+        point in time or not;
+
+        - and a last "has_shirked_or_neg_NPV" which stores booleans. True indicates that the bank has either shirked or
+        reach a negative net present value at some point in time (which is possible with the good technology when cash
+        flows are insufficient to compensate for the monitoring cost).
+
+        NB: This final column is built using the NPV_check function imported from the utils module.
         """
+
+        # This attribute stores the names of columns that will contain banks' cash flows in the output DataFrame
+        # It will be reused later on, eg. in apply_first_best_closure and apply_capital_requirements methods
         self.util = [f'cf_{i}' for i in range(n_periods)]
 
+        # We create the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
         ids = np.arange(1, n_banks+1)
 
+        # We instantiate void lists that will store banks' cash flows and has_shirked booleans
         all_cash_flows = []
         has_shirkeds = []
 
+        # We distinguish two cases depending on whether we want the output to be the same through different calls
         if fix_random_state:
-            np.random.seed(0)
-            x_0s = np.random.uniform(lower_x_0, higher_x_0, size=len(ids))
 
+            # We generate the initial cash flow level of each bank fixing the random seed at 0
+            # The x_0s are determined through a continuous uniform distribution of support [lower_x_0; upper_x_0]
+            np.random.seed(0)
+            x_0s = np.random.uniform(lower_x_0, upper_x_0, size=n_banks)
+
+            # We iterate over bank IDs and the array containing the different initial cash flow levels (same length)
             for i, x_0 in zip(ids, x_0s):
+                # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
                 bank = self.get_one_bank(x_0=x_0)
+
+                # We generate the bank's cash flows which are stored in its cash_flows attribute
                 bank.generate_cash_flows(n_periods=n_periods, dt=dt, random_seed=i)
 
+                # We append bank's cash flows and the output of the has_shirked method to related objects
                 all_cash_flows.append(bank.cash_flows)
                 has_shirkeds.append(bank.has_shirked())
 
         else:
-            x_0s = np.random.uniform(lower_x_0, higher_x_0, size=len(ids))
+            # As before, but this time without specifying any random seed, we generate initial cash flow levels
+            x_0s = np.random.uniform(lower_x_0, upper_x_0, size=len(ids))
 
+            # We iterate over bank IDs and the array containing the different initial cash flow levels (same length)
             for i, x_0 in zip(ids, x_0s):
+                # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
                 bank = self.get_one_bank(x_0=x_0)
+
+                # We generate the bank's cash flows which are stored in its cash_flows attribute
                 bank.generate_cash_flows(n_periods=n_periods, dt=dt)
 
+                # We append bank's cash flows and the output of the has_shirked method to related objects
                 all_cash_flows.append(bank.cash_flows)
                 has_shirkeds.append(bank.has_shirked())
 
-        df = pd.DataFrame(all_cash_flows, columns=[f'cf_{j}' for j in range(len(all_cash_flows[0]))])
+        # In the end, all_cash_flows is a list of list and we convert this 2-dimensional object into a DataFrame
+        # (all_cash_flows contains n_banks lists of n_periods cash flow levels generated as a geometric Brownian motion)
+        df = pd.DataFrame(all_cash_flows, columns=self.util)
 
+        # We add columns of interest
         df['bank_id'] = ids
         df['has_shirked'] = has_shirkeds
+
+        # We reindex the DataFrame with banks' IDs
         df.set_index('bank_id', inplace=True)
 
+        # Based on formulas that are detailed in the paper, we compute the positive net present value threshold
+        # (If a bank using the good monitoring technology has a cash flow level below this threshold, then the NPV of
+        # its assets is non-positive as bank's cash flows cannot compensate for the cost of the monitoring technology)
         self.nu_G = 1 / (self.r - self.mu_G)
         threshold = self.b / (self.nu_G - self.lambda_parameter)
+
+        # We run the check to identify banks that have reached a negative net present value at some point in time
         df['has_shirked_or_neg_NPV'] = df.apply(lambda row: NPV_check(row, threshold), axis=1)
 
+        # We output the result, in two different ways depending on the inplace argument
         if inplace:
-            self.simulation = df
+            self.simulation = df   # simulation attribute of the Economy instance is updated
         else:
-            return df.set_index('bank_id')
+            return df.set_index('bank_id')   # The attribute is left unchanged and the output is directly returned
 
     def apply_first_best_closure(self, inplace=True, verbose=1):
         if self.simulation is None:
