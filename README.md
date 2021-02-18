@@ -12,7 +12,7 @@ This repository hosts the code written so as to run simulations of the model dev
 
 If you are using [pip](https://pip.pypa.io/en/stable/), you can run the following command to install the `bank_regulation_project` package:
 
-```pip install git+https://github.com/pechouc/bank_regulation_project.git```
+```pip install --upgrade git+https://github.com/pechouc/bank_regulation_project.git```
 
 ## Refer to the Documentation
 
