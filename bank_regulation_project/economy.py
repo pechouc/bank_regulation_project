@@ -101,7 +101,7 @@ class TypicalBank:
             random_seeds = np.random.randint(1, 1000000, size=n_periods)
 
         # We iterate to simulate a n_periods-long geometric Brownian motion
-        for i in range(n_periods-1):
+        for i in range(n_periods - 1):
             # We fetch the current technology choice of the bank from the related instance attribute
             technology = self.technology_choices[-1]
 
@@ -316,7 +316,7 @@ class Economy:
         self.util = [f'cf_{i}' for i in range(n_periods)]
 
         # We create the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
-        ids = np.arange(1, n_banks+1)
+        ids = np.arange(1, n_banks + 1)
 
         # We instantiate void lists that will store banks' cash flows and has_shirked booleans
         all_cash_flows = []
@@ -414,8 +414,8 @@ class Economy:
             raise Exception('You need to first run a simulation before applying first-best closure.')
 
         # We use the formula detailed at page 139 of the paper to compute a_G based on economy parameters
-        self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+        self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
+            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
         # We deduce the first-best closure threshold
         threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
@@ -473,15 +473,15 @@ class Economy:
         # In case the apply_first_best_closure method has not been run before calling the one considered here,
         # we need to recompute a_G based on economy parameters and thanks to the formula at page 139 of the paper
         if self.a_G is None:
-            self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+            self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
+                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
         # We compute two components of the final formula related to the bad asset monitoring technology (1/2)
         self.nu_B = 1 / (self.r - self.mu_B)
 
         # We compute two components of the final formula related to the bad asset monitoring technology (2/2)
-        self.a_B = (1/2) + (self.mu_B / (self.sigma_B ** 2)) +\
-            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
+        self.a_B = (1 / 2) + (self.mu_B / (self.sigma_B ** 2)) +\
+            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
 
         # Again based on Proposition 2 of the paper (page 143), we verify capital requirements are needed in our case
         if self.b <= (self.r * (self.a_G * self.nu_G - self.a_B * self.nu_B) - (self.a_G - self.a_B)) / (self.a_G - 1):
