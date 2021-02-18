@@ -25,7 +25,7 @@ from bank_regulation_project.utils import generate_GBM, NPV_check
 
 class TypicalBank:
 
-    def __init__(self, x_0=2, b=6, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4):
+    def __init__(self, x_0=2, b=4, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4):
         """
         This is the instantiation method for the TypicalBank class.
 
