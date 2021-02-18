@@ -1,70 +1,21 @@
-# Data analysis
-- Document here the project: bank_regulation_project
-- Description: Project Description
-- Data Source:
-- Type of analysis:
+# Project Presentation
 
-Please document the project the better you can.
+This repository is part of an academic project conducted by Aurel Mélard, Victor Morisson and Paul-Emmanuel Chouc in the first year of the Master in Economics of Institut Polytechnique de Paris and under the supervision of Prof. Jean-Marc Bourgeon.
 
-# Stratup the project
+The goal of this project is to explore the rationale behind regulatory policies imposed to the financial sector and to analyse, from a theoretical standpoint, their efficiency. It mainly builds up on the "The three pillars of Basel II: optimizing the mix", a paper published by Jean-Paul Decamps, Jean-Charles Rochet and Benoît Roger in the *Journal of Financial Intermediation* in 2002.
 
-The initial setup.
+This repository hosts the code written so as to run simulations of the model developed by aforementioned authors and to test its applicability to macroeconomic shock scenarios.
 
-Create virtualenv and install the project:
-```bash
-  $ sudo apt-get install virtualenv python-pip python-dev
-  $ deactivate; virtualenv ~/venv ; source ~/venv/bin/activate ;\
-    pip install pip -U; pip install -r requirements.txt
-```
+# How to Use the Code in this Repository?
 
-Unittest test:
-```bash
-  $ make clean install test
-```
+## Install the Python Package
 
-Check for bank_regulation_project in gitlab.com/{group}.
-If your project is not set please add it:
+If you are using [pip](https://pip.pypa.io/en/stable/), you can run the following command to install the `bank_regulation_project` package:
 
-- Create a new project on `gitlab.com/{group}/bank_regulation_project`
-- Then populate it:
+```pip install git+https://github.com/pechouc/bank_regulation_project.git```
 
-```bash
-  $ ##   e.g. if group is "{group}" and project_name is "bank_regulation_project"
-  $ git remote add origin git@gitlab.com:{group}/bank_regulation_project.git
-  $ git push -u origin master
-  $ git push -u origin --tags
-```
+## Refer to the Documentation
 
-Functionnal test with a script:
-```bash
-  $ cd /tmp
-  $ bank_regulation_project-run
-```
-# Install
-Go to `gitlab.com/{group}/bank_regulation_project` to see the project, manage issues,
-setup you ssh public key, ...
+The full project documentation is available [here](https://pechouc.github.io/bank_regulation_project/) for detailed specifications.
 
-Create a python3 virtualenv and activate it:
-```bash
-  $ sudo apt-get install virtualenv python-pip python-dev
-  $ deactivate; virtualenv -ppython3 ~/venv ; source ~/venv/bin/activate
-```
-
-Clone the project and install it:
-```bash
-  $ git clone gitlab.com/{group}/bank_regulation_project
-  $ cd bank_regulation_project
-  $ pip install -r requirements.txt
-  $ make clean install test                # install and test
-```
-Functionnal test with a script:
-```bash
-  $ cd /tmp
-  $ bank_regulation_project-run
-``` 
-
-# Continus integration
-## Github 
-Every push of `master` branch will execute `.github/workflows/pythonpackages.yml` docker jobs.
-## Gitlab
-Every push of `master` branch will execute `.gitlab-ci.yml` docker jobs.
+The documentation was built with [pdoc](https://pdoc3.github.io/pdoc/).

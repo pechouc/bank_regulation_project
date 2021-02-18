@@ -216,19 +216,19 @@ class Economy:
         if sigma_G ** 2 >= ((mu_G + mu_B) / 2):
             raise Exception('Technical assumption not satisfied (cf. page 138 of the paper).')
 
-        # # Assumption on the lambda parameter
-        # # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
-        # if (lambda_parameter < 1 / (r - mu_B)) or (lambda_parameter > 1 / (r - mu_G)):
-        #     error_message = 'Condition on the lambda parameter is not satisfied. In this case, '
-        #     error_message += f'value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.'
-        #     raise Exception(error_message)
+        # Assumption on the lambda parameter
+        # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
+        if (lambda_parameter < 1 / (r - mu_B)) or (lambda_parameter > 1 / (r - mu_G)):
+            error_message = 'Condition on the lambda parameter is not satisfied. In this case, '
+            error_message += f'value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.'
+            raise Exception(error_message)
 
-        # # This check and the one below are related to the bank's liabilities (detailed at p. 141)
-        # if r * d / (r - mu_G) - d <= 0:
-        #     raise Exception('When liquidation takes place, the book value of the bank equity must be positive.')
+        # This check and the one below are related to the bank's liabilities (detailed at p. 141)
+        if r * d / (r - mu_G) - d <= 0:
+            raise Exception('When liquidation takes place, the book value of the bank equity must be positive.')
 
-        # if r * d * lambda_parameter >= 1:
-        #     raise Exception('Liquidation should not permit the repayment of all deposits, which would not be risky.')
+        if r * d * lambda_parameter >= 1:
+            raise Exception('Liquidation should not permit the repayment of all deposits, which would not be risky.')
 
         self.b = b
         self.r = r
