@@ -59,7 +59,7 @@ from bank_regulation_project.utils import generate_GBM, NPV_check
 
 class TypicalBank:
 
-    def __init__(self, x_0, b, r, mu_G, sigma_G, mu_B, sigma_B):
+    def __init__(self, x_0=2, b=4, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4):
         &#34;&#34;&#34;
         This is the instantiation method for the TypicalBank class.
 
@@ -135,7 +135,7 @@ class TypicalBank:
             random_seeds = np.random.randint(1, 1000000, size=n_periods)
 
         # We iterate to simulate a n_periods-long geometric Brownian motion
-        for i in range(n_periods-1):
+        for i in range(n_periods - 1):
             # We fetch the current technology choice of the bank from the related instance attribute
             technology = self.technology_choices[-1]
 
@@ -250,19 +250,19 @@ class Economy:
         if sigma_G ** 2 &gt;= ((mu_G + mu_B) / 2):
             raise Exception(&#39;Technical assumption not satisfied (cf. page 138 of the paper).&#39;)
 
-        # # Assumption on the lambda parameter
-        # # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
-        # if (lambda_parameter &lt; 1 / (r - mu_B)) or (lambda_parameter &gt; 1 / (r - mu_G)):
-        #     error_message = &#39;Condition on the lambda parameter is not satisfied. In this case, &#39;
-        #     error_message += f&#39;value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.&#39;
-        #     raise Exception(error_message)
+        # Assumption on the lambda parameter
+        # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
+        if (lambda_parameter &lt; 1 / (r - mu_B)) or (lambda_parameter &gt; 1 / (r - mu_G)):
+            error_message = &#39;Condition on the lambda parameter is not satisfied. In this case, &#39;
+            error_message += f&#39;value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.&#39;
+            raise Exception(error_message)
 
-        # # This check and the one below are related to the bank&#39;s liabilities (detailed at p. 141)
-        # if r * d / (r - mu_G) - d &lt;= 0:
-        #     raise Exception(&#39;When liquidation takes place, the book value of the bank equity must be positive.&#39;)
+        # This check and the one below are related to the bank&#39;s liabilities (detailed at p. 141)
+        if r * d / (r - mu_G) - d &lt;= 0:
+            raise Exception(&#39;When liquidation takes place, the book value of the bank equity must be positive.&#39;)
 
-        # if r * d * lambda_parameter &gt;= 1:
-        #     raise Exception(&#39;Liquidation should not permit the repayment of all deposits, which would not be risky.&#39;)
+        if r * d * lambda_parameter &gt;= 1:
+            raise Exception(&#39;Liquidation should not permit the repayment of all deposits, which would not be risky.&#39;)
 
         self.b = b
         self.r = r
@@ -350,7 +350,7 @@ class Economy:
         self.util = [f&#39;cf_{i}&#39; for i in range(n_periods)]
 
         # We create the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
-        ids = np.arange(1, n_banks+1)
+        ids = np.arange(1, n_banks + 1)
 
         # We instantiate void lists that will store banks&#39; cash flows and has_shirked booleans
         all_cash_flows = []
@@ -448,8 +448,8 @@ class Economy:
             raise Exception(&#39;You need to first run a simulation before applying first-best closure.&#39;)
 
         # We use the formula detailed at page 139 of the paper to compute a_G based on economy parameters
-        self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+        self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
+            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
         # We deduce the first-best closure threshold
         threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
@@ -507,15 +507,15 @@ class Economy:
         # In case the apply_first_best_closure method has not been run before calling the one considered here,
         # we need to recompute a_G based on economy parameters and thanks to the formula at page 139 of the paper
         if self.a_G is None:
-            self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+            self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
+                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
         # We compute two components of the final formula related to the bad asset monitoring technology (1/2)
         self.nu_B = 1 / (self.r - self.mu_B)
 
         # We compute two components of the final formula related to the bad asset monitoring technology (2/2)
-        self.a_B = (1/2) + (self.mu_B / (self.sigma_B ** 2)) +\
-            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
+        self.a_B = (1 / 2) + (self.mu_B / (self.sigma_B ** 2)) +\
+            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
 
         # Again based on Proposition 2 of the paper (page 143), we verify capital requirements are needed in our case
         if self.b &lt;= (self.r * (self.a_G * self.nu_G - self.a_B * self.nu_B) - (self.a_G - self.a_B)) / (self.a_G - 1):
@@ -645,19 +645,19 @@ assumptions posed by authors do hold.</p></div>
         if sigma_G ** 2 &gt;= ((mu_G + mu_B) / 2):
             raise Exception(&#39;Technical assumption not satisfied (cf. page 138 of the paper).&#39;)
 
-        # # Assumption on the lambda parameter
-        # # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
-        # if (lambda_parameter &lt; 1 / (r - mu_B)) or (lambda_parameter &gt; 1 / (r - mu_G)):
-        #     error_message = &#39;Condition on the lambda parameter is not satisfied. In this case, &#39;
-        #     error_message += f&#39;value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.&#39;
-        #     raise Exception(error_message)
+        # Assumption on the lambda parameter
+        # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
+        if (lambda_parameter &lt; 1 / (r - mu_B)) or (lambda_parameter &gt; 1 / (r - mu_G)):
+            error_message = &#39;Condition on the lambda parameter is not satisfied. In this case, &#39;
+            error_message += f&#39;value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.&#39;
+            raise Exception(error_message)
 
-        # # This check and the one below are related to the bank&#39;s liabilities (detailed at p. 141)
-        # if r * d / (r - mu_G) - d &lt;= 0:
-        #     raise Exception(&#39;When liquidation takes place, the book value of the bank equity must be positive.&#39;)
+        # This check and the one below are related to the bank&#39;s liabilities (detailed at p. 141)
+        if r * d / (r - mu_G) - d &lt;= 0:
+            raise Exception(&#39;When liquidation takes place, the book value of the bank equity must be positive.&#39;)
 
-        # if r * d * lambda_parameter &gt;= 1:
-        #     raise Exception(&#39;Liquidation should not permit the repayment of all deposits, which would not be risky.&#39;)
+        if r * d * lambda_parameter &gt;= 1:
+            raise Exception(&#39;Liquidation should not permit the repayment of all deposits, which would not be risky.&#39;)
 
         self.b = b
         self.r = r
@@ -745,7 +745,7 @@ assumptions posed by authors do hold.</p></div>
         self.util = [f&#39;cf_{i}&#39; for i in range(n_periods)]
 
         # We create the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
-        ids = np.arange(1, n_banks+1)
+        ids = np.arange(1, n_banks + 1)
 
         # We instantiate void lists that will store banks&#39; cash flows and has_shirked booleans
         all_cash_flows = []
@@ -843,8 +843,8 @@ assumptions posed by authors do hold.</p></div>
             raise Exception(&#39;You need to first run a simulation before applying first-best closure.&#39;)
 
         # We use the formula detailed at page 139 of the paper to compute a_G based on economy parameters
-        self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+        self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
+            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
         # We deduce the first-best closure threshold
         threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
@@ -902,15 +902,15 @@ assumptions posed by authors do hold.</p></div>
         # In case the apply_first_best_closure method has not been run before calling the one considered here,
         # we need to recompute a_G based on economy parameters and thanks to the formula at page 139 of the paper
         if self.a_G is None:
-            self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+            self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
+                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
         # We compute two components of the final formula related to the bad asset monitoring technology (1/2)
         self.nu_B = 1 / (self.r - self.mu_B)
 
         # We compute two components of the final formula related to the bad asset monitoring technology (2/2)
-        self.a_B = (1/2) + (self.mu_B / (self.sigma_B ** 2)) +\
-            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
+        self.a_B = (1 / 2) + (self.mu_B / (self.sigma_B ** 2)) +\
+            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
 
         # Again based on Proposition 2 of the paper (page 143), we verify capital requirements are needed in our case
         if self.b &lt;= (self.r * (self.a_G * self.nu_G - self.a_B * self.nu_B) - (self.a_G - self.a_B)) / (self.a_G - 1):
@@ -1014,15 +1014,15 @@ bute is not modified;</p>
     # In case the apply_first_best_closure method has not been run before calling the one considered here,
     # we need to recompute a_G based on economy parameters and thanks to the formula at page 139 of the paper
     if self.a_G is None:
-        self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+        self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
+            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
     # We compute two components of the final formula related to the bad asset monitoring technology (1/2)
     self.nu_B = 1 / (self.r - self.mu_B)
 
     # We compute two components of the final formula related to the bad asset monitoring technology (2/2)
-    self.a_B = (1/2) + (self.mu_B / (self.sigma_B ** 2)) +\
-        np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
+    self.a_B = (1 / 2) + (self.mu_B / (self.sigma_B ** 2)) +\
+        np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
 
     # Again based on Proposition 2 of the paper (page 143), we verify capital requirements are needed in our case
     if self.b &lt;= (self.r * (self.a_G * self.nu_G - self.a_B * self.nu_B) - (self.a_G - self.a_B)) / (self.a_G - 1):
@@ -1123,8 +1123,8 @@ bute is not modified;</p>
         raise Exception(&#39;You need to first run a simulation before applying first-best closure.&#39;)
 
     # We use the formula detailed at page 139 of the paper to compute a_G based on economy parameters
-    self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
-        np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+    self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
+        np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
     # We deduce the first-best closure threshold
     threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
@@ -1294,7 +1294,7 @@ flows are insufficient to compensate for the monitoring cost).</p>
     self.util = [f&#39;cf_{i}&#39; for i in range(n_periods)]
 
     # We create the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
-    ids = np.arange(1, n_banks+1)
+    ids = np.arange(1, n_banks + 1)
 
     # We instantiate void lists that will store banks&#39; cash flows and has_shirked booleans
     all_cash_flows = []
@@ -1367,7 +1367,7 @@ flows are insufficient to compensate for the monitoring cost).</p>
 </dd>
 <dt id="bank_regulation_project.economy.TypicalBank"><code class="flex name class">
 <span>class <span class="ident">TypicalBank</span></span>
-<span>(</span><span>x_0, b, r, mu_G, sigma_G, mu_B, sigma_B)</span>
+<span>(</span><span>x_0=2, b=4, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This is the instantiation method for the TypicalBank class.</p>
@@ -1403,7 +1403,7 @@ for both the good and the bad technologies, so as to determine with what technol
 </summary>
 <pre><code class="python">class TypicalBank:
 
-    def __init__(self, x_0, b, r, mu_G, sigma_G, mu_B, sigma_B):
+    def __init__(self, x_0=2, b=4, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4):
         &#34;&#34;&#34;
         This is the instantiation method for the TypicalBank class.
 
@@ -1479,7 +1479,7 @@ for both the good and the bad technologies, so as to determine with what technol
             random_seeds = np.random.randint(1, 1000000, size=n_periods)
 
         # We iterate to simulate a n_periods-long geometric Brownian motion
-        for i in range(n_periods-1):
+        for i in range(n_periods - 1):
             # We fetch the current technology choice of the bank from the related instance attribute
             technology = self.technology_choices[-1]
 
@@ -1612,7 +1612,7 @@ in time, the bank should have the possibility to "shirk", ie. to move from the g
         random_seeds = np.random.randint(1, 1000000, size=n_periods)
 
     # We iterate to simulate a n_periods-long geometric Brownian motion
-    for i in range(n_periods-1):
+    for i in range(n_periods - 1):
         # We fetch the current technology choice of the bank from the related instance attribute
         technology = self.technology_choices[-1]
 
