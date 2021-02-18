@@ -1,0 +1,1760 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>bank_regulation_project.economy API documentation</title>
+<meta name="description" content="This module is the central one in the bank regulation project …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>bank_regulation_project.economy</code></h1>
+</header>
+<section id="section-intro">
+<p>This module is the central one in the bank regulation project.</p>
+<p>It defines two classes, TypicalBank and Economy, whose methods we use to run simulations.</p>
+<p>Formulas, assumptions and economic interpretations used throughout the file are taken from "The three pillars of Basel
+II: optimizing the mix", a paper published by Jean-Paul Decamps, Jean-Charles Rochet and Benoît Roger in the "Journal of
+Financial Intermediation" in 2002.</p>
+<p>Details about how the simulations are conceived can be found in the description of each class and of related methods.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+This module is the central one in the bank regulation project.
+
+It defines two classes, TypicalBank and Economy, whose methods we use to run simulations.
+
+Formulas, assumptions and economic interpretations used throughout the file are taken from &#34;The three pillars of Basel
+II: optimizing the mix&#34;, a paper published by Jean-Paul Decamps, Jean-Charles Rochet and Benoît Roger in the &#34;Journal of
+Financial Intermediation&#34; in 2002.
+
+Details about how the simulations are conceived can be found in the description of each class and of related methods.
+&#34;&#34;&#34;
+
+# ----------------------------------------------------------------------------------------------------------------------
+# IMPORTS
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from bank_regulation_project.utils import generate_GBM, NPV_check
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# CONTENT
+
+class TypicalBank:
+
+    def __init__(self, x_0, b, r, mu_G, sigma_G, mu_B, sigma_B):
+        &#34;&#34;&#34;
+        This is the instantiation method for the TypicalBank class.
+
+        It requires as arguments:
+
+        - x_0: the initial value of the bank&#39;s cash flows;
+
+        - b: the monitoring cost associated with the good asset management technology;
+
+        - r: the interest rate;
+
+        - mu_G: the instantaneous drift associated with the good asset management technology;
+
+        - mu_B: the instantaneous drift associated with the bad asset management technology;
+
+        - sigma_G: the instantaneous variance associated with the good asset management technology;
+
+        - sigma_B: the instantaneous variance associated with the bad asset management technology.
+
+        Based on these parameters, the expected present value of the bank&#39;s cash flows from time 0 onwards is computed
+        for both the good and the bad technologies, so as to determine with what technology the bank starts.
+        &#34;&#34;&#34;
+        self.cash_flows = [x_0]
+
+        self.b = b
+        self.r = r
+
+        self.mu_G = mu_G
+        self.sigma_G = sigma_G
+
+        self.mu_B = mu_B
+        self.sigma_B = sigma_B
+
+        # We compare the expected present value of the bank&#39;s cash flows with the good and the bad technology
+        if (x_0 / (self.r - self.mu_G) - self.b) &gt;= (x_0 / (self.r - self.mu_B)):
+
+            # If condition is satisfied, the bank first chooses the good asset management technology
+            self.technology_choices = [&#39;good&#39;]
+
+        else:
+
+            # If condition is not satisfied, the bank first chooses the bad asset management technology
+            self.technology_choices = [&#39;bad&#39;]
+
+    def generate_cash_flows(self, n_periods=200, dt=0.01, random_seed=None, verbose=0):
+        &#34;&#34;&#34;
+        This method allows to simulate the cash flows of the bank.
+
+        It does not return any output but modifies the &#34;cash_flows&#34; and &#34;technology_choices&#34; attribute of the instance
+        of the TypicalBank class considered.
+
+        It takes as arguments:
+
+        - n_periods: the number of time increments covered by the simulation (cash flows composed of n_periods values);
+
+        - dt: the length of each time step which is used to simulate a Geometric Brownian motion as a discrete sequence;
+
+        - random_seed: an integer that allows to pre-determine the &#34;state of the world&#34; for the simulation (ie. several
+        simulations with the same random seed yield the same output);
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+
+        In order to run the simulation, this function relies on the generate_GBM function, imported from utils.py and
+        called at each time increment. We cannot generate directly a n_periods-long cash flow series since at any point
+        in time, the bank should have the possibility to &#34;shirk&#34;, ie. to move from the good to the bad technology.
+        &#34;&#34;&#34;
+
+        # If a random seed is specified, this means that we want the same output each time we call this method
+        if random_seed is not None:
+            # To do so, we use the provided random seed to generate (the draw is random but we will always obtain the
+            # same with a given seed) n_periods random seeds which will be used when calling the generate_GBM function
+            np.random.seed(random_seed)
+            random_seeds = np.random.randint(1, 1000000, size=n_periods)
+
+        # We iterate to simulate a n_periods-long geometric Brownian motion
+        for i in range(n_periods-1):
+            # We fetch the current technology choice of the bank from the related instance attribute
+            technology = self.technology_choices[-1]
+
+            # We use this technology choice to determine what mu and sigma to use at this time step
+            if technology == &#39;good&#39;:
+                mu = self.mu_G
+                sigma = self.sigma_G
+            else:
+                mu = self.mu_B
+                sigma = self.sigma_B
+
+            # We fetch the current level of cash flows of the bank from the related instance attribute
+            x_t = self.cash_flows[-1]
+
+            # Here, we distinguish two cases depending on whether a random seed was specified or not
+            if random_seed is not None:
+
+                # We use the n-periods random seeds we have generated to determine the &#34;state of the world&#34; in which
+                # the simulation of the geometric Brownian motion at the (i+1)-th time step occurs
+                gbm_draw = generate_GBM(mu=mu, sigma=sigma, n=1, dt=dt, x_0=x_t, random_seed=random_seeds[i])[-1]
+
+            else:
+
+                # Here, we do not specify any random seed and let the generate_GBM function run undeterministically
+                gbm_draw = generate_GBM(mu=mu, sigma=sigma, n=1, dt=dt, x_0=x_t)[-1]
+
+            # We append the new cash flow level of the bank to its cash_flows attribute
+            self.cash_flows.append(gbm_draw)
+
+            # And we determine the next technology choice of the bank based on this cash_flow level
+            if (self.cash_flows[-1] / (self.r - self.mu_G) - self.b) &gt; (self.cash_flows[-1] / (self.r - self.mu_B)):
+                self.technology_choices.append(&#39;good&#39;)
+            else:
+                self.technology_choices.append(&#39;bad&#39;)
+
+        if verbose:
+            print(&#39;Cash-flow and technology choice attributes were updated.&#39;)
+
+    def plot_cash_flows(self):
+        &#34;&#34;&#34;
+        This method allows to rapidly plot the cash flows of the bank.
+
+        It does not require any argument but runs a check to verify that cash flows have been generated beforehand.
+        &#34;&#34;&#34;
+
+        # This check ensures that some cash flows have been generated beforehand
+        if len(self.cash_flows) == 1:
+            raise Exception(&#34;Run a simulation of the bank&#39;s cash flows before plotting them.&#34;)
+
+        # We simply output a lineplot of the bank&#39;s cash flows (the x-axis corresponding to periods)
+        plt.plot(self.cash_flows)
+        plt.show()
+
+    def has_shirked(self):
+        &#34;&#34;&#34;
+        This method allows to check whether a bank has shirked, ie. has chosen the bad technology at some point in time,
+        or not.
+
+        It does not require any argument and outputs a boolean which is:
+
+        - True: the bank has shirked, ie. has chosen the bad technology at some point in time;
+        - False: the bank has not shirked and kept running with the good technology throughout time.
+
+        NB: Here, we do not run any check to verify for instance whether cash flows have been generated in the first
+        place because the first cash flow level, x_0, is determined at the instantiation of the bank and if low enough,
+        can potentially induce the bank to choose the bad technology from start.
+        &#34;&#34;&#34;
+        return (&#39;bad&#39; in self.technology_choices)
+
+
+class Economy:
+
+    def __init__(self, b=6, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4, lambda_parameter=2.9, d=1):
+        &#34;&#34;&#34;
+        This is the instantiation method for the Economy class.
+
+        It requires as arguments:
+
+        - b: the monitoring cost associated with the good asset management technology;
+
+        - r: the interest rate;
+
+        - mu_G: the instantaneous drift associated with the good asset management technology;
+
+        - mu_B: the instantaneous drift associated with the bad asset management technology;
+
+        - sigma_G: the instantaneous variance associated with the good asset management technology;
+
+        - sigma_B: the instantaneous variance associated with the bad asset management technology;
+
+        - lambda_parameter, which corresponds to lambda in the paper by Decamps, Rochet and Roger and, ie. the parameter
+        that determines the liquidation value (lambda * x) of each bank in the economy;
+
+        - d: the amount of (risky) deposits held by each bank in the economy.
+
+        Beside instantiation itself, this method runs several checks on provided parameters to verify that the various
+        assumptions posed by authors do hold.
+        &#34;&#34;&#34;
+
+        # Assumption that needs to hold for most computations in the paper (mentioned p. 137)
+        if r &lt;= mu_G:
+            raise Exception(&#39;The interest rate must be strictly greater than the mu_G paramater.&#39;)
+
+        # This check and the one that follows ensure that there is a form of hierarchy between good and bad technologies
+        if mu_G &lt; mu_B:
+            raise Exception(&#39;Due to the &#34;hierarchy&#34; between good and the bad technologies, mu_G must be above mu_B.&#39;)
+
+        if sigma_B &lt; sigma_G:
+            raise Exception(&#39;Because the bad technology is more risky, sigma_B must be above sigma_G.&#39;)
+
+        # This check verifies a technical assumption made by authors on GBM parameters
+        if sigma_G ** 2 &gt;= ((mu_G + mu_B) / 2):
+            raise Exception(&#39;Technical assumption not satisfied (cf. page 138 of the paper).&#39;)
+
+        # # Assumption on the lambda parameter
+        # # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
+        # if (lambda_parameter &lt; 1 / (r - mu_B)) or (lambda_parameter &gt; 1 / (r - mu_G)):
+        #     error_message = &#39;Condition on the lambda parameter is not satisfied. In this case, &#39;
+        #     error_message += f&#39;value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.&#39;
+        #     raise Exception(error_message)
+
+        # # This check and the one below are related to the bank&#39;s liabilities (detailed at p. 141)
+        # if r * d / (r - mu_G) - d &lt;= 0:
+        #     raise Exception(&#39;When liquidation takes place, the book value of the bank equity must be positive.&#39;)
+
+        # if r * d * lambda_parameter &gt;= 1:
+        #     raise Exception(&#39;Liquidation should not permit the repayment of all deposits, which would not be risky.&#39;)
+
+        self.b = b
+        self.r = r
+
+        self.mu_G = mu_G
+        self.sigma_G = sigma_G
+
+        self.mu_B = mu_B
+        self.sigma_B = sigma_B
+
+        self.lambda_parameter = lambda_parameter
+
+        # This attribute will eventually be &#34;filled&#34; with the output of the simulation
+        self.simulation = None
+
+        # This attribute is eventually &#34;filled&#34; within the apply_first_best_closure method
+        self.a_G = None
+
+    def get_one_bank(self, x_0=10):
+        &#34;&#34;&#34;
+        This method allows to instantiate a bank, using economy-wide parameters.
+
+        It only requires x_0 as an argument, which corresponds to the initial cash flow level of the bank.
+
+        It returns an instance from the TypicalBank class, defined aboveself.
+        &#34;&#34;&#34;
+        return TypicalBank(x_0=x_0,
+                           b=self.b, r=self.r,
+                           mu_G=self.mu_G, sigma_G=self.sigma_G,
+                           mu_B=self.mu_B, sigma_B=self.sigma_B)
+
+    def run_simulation(self, n_banks=100,
+                       lower_x_0=2, upper_x_0=5,
+                       n_periods=200, dt=0.01,
+                       fix_random_state=False,
+                       inplace=True):
+        &#34;&#34;&#34;
+        This method is the core simulation method provided by the Economy class.
+
+        It requires several arguments:
+
+        - n_banks: the number of banks to include in the simulation;
+
+        - lower_x_0: the lower bound for the support of the uniform distribution that determines the initial cash flow
+        level of each bank;
+
+        - upper_x_0: the upper bound for the support of the uniform distribution that determines the initial cash flow
+        level of each bank;
+
+        - n_periods: the number of periods during which one wants to simulate the banks&#39; cash flows;
+
+        - dt: the timestep to be used when generating banks&#39; cash flows using geometric Brownian motions;
+
+        - fix_random_state: boolean that indicates whether to fix or not the random state of the simulation. If set to
+        True, the output of the method will be the same through a call to another; if set to False, different calls will
+        of the method will yield different outputs;
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified.
+
+        Based on these arguments and using the generate_cash_flows method of TypicalBank instances, this method instan-
+        tiate a number of banks, simulates their cash flows and determines whether they have shirked or their assets
+        have reached a negative net present value at some point in time.
+
+        It returns a DataFrame:
+
+        - indexed by banks&#39; ID, which range from 1 to n_banks;
+
+        - whose n_periods first columns (called &#34;cf_0&#34;, &#34;cf_1&#34;, etc) store the cash flow levels of each bank at each
+        point in time;
+
+        - with an additional &#34;has_shirked&#34; column which indicates whether the bank has chosen the bad technology at some
+        point in time or not;
+
+        - and a last &#34;has_shirked_or_neg_NPV&#34; which stores booleans. True indicates that the bank has either shirked or
+        reach a negative net present value at some point in time (which is possible with the good technology when cash
+        flows are insufficient to compensate for the monitoring cost).
+
+        NB: This final column is built using the NPV_check function imported from the utils module.
+        &#34;&#34;&#34;
+
+        # This attribute stores the names of columns that will contain banks&#39; cash flows in the output DataFrame
+        # It will be reused later on, eg. in apply_first_best_closure and apply_capital_requirements methods
+        self.util = [f&#39;cf_{i}&#39; for i in range(n_periods)]
+
+        # We create the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
+        ids = np.arange(1, n_banks+1)
+
+        # We instantiate void lists that will store banks&#39; cash flows and has_shirked booleans
+        all_cash_flows = []
+        has_shirkeds = []
+
+        # We distinguish two cases depending on whether we want the output to be the same through different calls
+        if fix_random_state:
+
+            # We generate the initial cash flow level of each bank fixing the random seed at 0
+            # The x_0s are determined through a continuous uniform distribution of support [lower_x_0; upper_x_0]
+            np.random.seed(0)
+            x_0s = np.random.uniform(lower_x_0, upper_x_0, size=n_banks)
+
+            # We iterate over bank IDs and the array containing the different initial cash flow levels (same length)
+            for i, x_0 in zip(ids, x_0s):
+                # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
+                bank = self.get_one_bank(x_0=x_0)
+
+                # We generate the bank&#39;s cash flows which are stored in its cash_flows attribute
+                bank.generate_cash_flows(n_periods=n_periods, dt=dt, random_seed=i)
+
+                # We append bank&#39;s cash flows and the output of the has_shirked method to related objects
+                all_cash_flows.append(bank.cash_flows)
+                has_shirkeds.append(bank.has_shirked())
+
+        else:
+            # As before, but this time without specifying any random seed, we generate initial cash flow levels
+            x_0s = np.random.uniform(lower_x_0, upper_x_0, size=len(ids))
+
+            # We iterate over bank IDs and the array containing the different initial cash flow levels (same length)
+            for i, x_0 in zip(ids, x_0s):
+                # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
+                bank = self.get_one_bank(x_0=x_0)
+
+                # We generate the bank&#39;s cash flows which are stored in its cash_flows attribute
+                bank.generate_cash_flows(n_periods=n_periods, dt=dt)
+
+                # We append bank&#39;s cash flows and the output of the has_shirked method to related objects
+                all_cash_flows.append(bank.cash_flows)
+                has_shirkeds.append(bank.has_shirked())
+
+        # In the end, all_cash_flows is a list of list and we convert this 2-dimensional object into a DataFrame
+        # (all_cash_flows contains n_banks lists of n_periods cash flow levels generated as a geometric Brownian motion)
+        df = pd.DataFrame(all_cash_flows, columns=self.util)
+
+        # We add columns of interest
+        df[&#39;bank_id&#39;] = ids
+        df[&#39;has_shirked&#39;] = has_shirkeds
+
+        # We reindex the DataFrame with banks&#39; IDs
+        df.set_index(&#39;bank_id&#39;, inplace=True)
+
+        # Based on formulas that are detailed in the paper, we compute the positive net present value threshold
+        # (If a bank using the good monitoring technology has a cash flow level below this threshold, then the NPV of
+        # its assets is non-positive as bank&#39;s cash flows cannot compensate for the cost of the monitoring technology)
+        self.nu_G = 1 / (self.r - self.mu_G)
+        threshold = self.b / (self.nu_G - self.lambda_parameter)
+
+        # We run the check to identify banks that have reached a negative net present value at some point in time
+        df[&#39;has_shirked_or_neg_NPV&#39;] = df.apply(lambda row: NPV_check(row, threshold), axis=1)
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            self.simulation = df   # simulation attribute of the Economy instance is updated
+        else:
+            return df.set_index(&#39;bank_id&#39;)   # The attribute is left unchanged and the output is directly returned
+
+    def apply_first_best_closure(self, inplace=True, verbose=1):
+        &#34;&#34;&#34;
+        Based on the formula described in Proposition 1 (page 140 of the paper), this method applies the first-best clo-
+        sure threshold of the regulator, ie. the threshold which maximizes the option value associated to the irreversi-
+        ble closure decision.
+
+        In practice, the first step is to compute this threshold using the parameters of the economy and then, a check
+        is run upon each line of the simulation DataFrame to verify, for each bank, whether its cash flows have gone
+        below the closure threshold at some point in time.
+
+        It then creates a new column, &#39;first_best_closure&#39;, which takes the value:
+
+        - True, if the bank should have been closed at some point in time based on the first-best threshold;
+
+        - False, if not.
+
+        This method takes two simple arguments:
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified;
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+        &#34;&#34;&#34;
+
+        # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
+        if self.simulation is None:
+            raise Exception(&#39;You need to first run a simulation before applying first-best closure.&#39;)
+
+        # We use the formula detailed at page 139 of the paper to compute a_G based on economy parameters
+        self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
+            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+
+        # We deduce the first-best closure threshold
+        threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation[&#39;first_best_closure&#39;] =\
+                self.simulation.apply(lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print(&#39;Simulation attribute (DataFrame) updated with the first-best closure column.&#39;)
+
+        if not inplace:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df[&#39;first_best_closure&#39;] = df.apply(lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print(&#39;Simulation attribute was left unchanged (inplace=False was passed).&#39;)
+
+            return df
+
+    def apply_capital_requirements(self, inplace=True, verbose=1):
+        &#34;&#34;&#34;
+        Based on the formula described in Proposition 2 (page 143 of the paper), this method applies the second-best
+        closure threshold of the regulator, ie. the threshold associated with the optimal capital ratio under which
+        banks have no incentive to shirk.
+
+        As above for the first-best closure, the first step is to compute the capital requirements threshold and a check
+        is then run upon each line of the simulation DataFrame to determine whether the bank&#39;s cash flows have gone be-
+        low the closure threshold at some point in time.
+
+        It then creates a new column, &#39;capital_requirements_closure&#39;, which takes the value:
+
+        - True, if the bank should have been closed based on capital requirements at some point in time;
+
+        - False, if not.
+
+        This method takes two simple arguments:
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified;
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+        &#34;&#34;&#34;
+
+        # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
+        if self.simulation is None:
+            raise Exception(&#39;You need to first run a simulation before applying capital requirements.&#39;)
+
+        # In case the apply_first_best_closure method has not been run before calling the one considered here,
+        # we need to recompute a_G based on economy parameters and thanks to the formula at page 139 of the paper
+        if self.a_G is None:
+            self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
+                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+
+        # We compute two components of the final formula related to the bad asset monitoring technology (1/2)
+        self.nu_B = 1 / (self.r - self.mu_B)
+
+        # We compute two components of the final formula related to the bad asset monitoring technology (2/2)
+        self.a_B = (1/2) + (self.mu_B / (self.sigma_B ** 2)) +\
+            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
+
+        # Again based on Proposition 2 of the paper (page 143), we verify capital requirements are needed in our case
+        if self.b &lt;= (self.r * (self.a_G * self.nu_G - self.a_B * self.nu_B) - (self.a_G - self.a_B)) / (self.a_G - 1):
+            raise Exception(
+                &#39;With the considered parameters, capital requirements regulation is not needed.&#39;
+                + &#39; &#39;
+                + &#39;This happens when the monitoring cost is not &#34;large enough&#34; - See Proposition 2 (page 143).&#39;
+            )
+
+        # We deduce from previous computations the second-best / capital requirements closure threshold
+        threshold = ((self.a_G - 1) * self.b + self.a_G - self.a_B) / (self.a_G * self.nu_G - self.a_B * self.nu_B)
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation[&#39;capital_requirements_closure&#39;] =\
+                self.simulation.apply(lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print(&#39;Simulation attribute (DataFrame) updated with the second-best closure column.&#39;)
+
+        if not inplace:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df[&#39;capital_requirements_closure&#39;] = df.apply(
+                lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1
+            )
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print(&#39;Simulation attribute was left unchanged (inplace=False was passed).&#39;)
+
+            return df</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="bank_regulation_project.economy.Economy"><code class="flex name class">
+<span>class <span class="ident">Economy</span></span>
+<span>(</span><span>b=6, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4, lambda_parameter=2.9, d=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This is the instantiation method for the Economy class.</p>
+<p>It requires as arguments:</p>
+<ul>
+<li>
+<p>b: the monitoring cost associated with the good asset management technology;</p>
+</li>
+<li>
+<p>r: the interest rate;</p>
+</li>
+<li>
+<p>mu_G: the instantaneous drift associated with the good asset management technology;</p>
+</li>
+<li>
+<p>mu_B: the instantaneous drift associated with the bad asset management technology;</p>
+</li>
+<li>
+<p>sigma_G: the instantaneous variance associated with the good asset management technology;</p>
+</li>
+<li>
+<p>sigma_B: the instantaneous variance associated with the bad asset management technology;</p>
+</li>
+<li>
+<p>lambda_parameter, which corresponds to lambda in the paper by Decamps, Rochet and Roger and, ie. the parameter
+that determines the liquidation value (lambda * x) of each bank in the economy;</p>
+</li>
+<li>
+<p>d: the amount of (risky) deposits held by each bank in the economy.</p>
+</li>
+</ul>
+<p>Beside instantiation itself, this method runs several checks on provided parameters to verify that the various
+assumptions posed by authors do hold.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Economy:
+
+    def __init__(self, b=6, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4, lambda_parameter=2.9, d=1):
+        &#34;&#34;&#34;
+        This is the instantiation method for the Economy class.
+
+        It requires as arguments:
+
+        - b: the monitoring cost associated with the good asset management technology;
+
+        - r: the interest rate;
+
+        - mu_G: the instantaneous drift associated with the good asset management technology;
+
+        - mu_B: the instantaneous drift associated with the bad asset management technology;
+
+        - sigma_G: the instantaneous variance associated with the good asset management technology;
+
+        - sigma_B: the instantaneous variance associated with the bad asset management technology;
+
+        - lambda_parameter, which corresponds to lambda in the paper by Decamps, Rochet and Roger and, ie. the parameter
+        that determines the liquidation value (lambda * x) of each bank in the economy;
+
+        - d: the amount of (risky) deposits held by each bank in the economy.
+
+        Beside instantiation itself, this method runs several checks on provided parameters to verify that the various
+        assumptions posed by authors do hold.
+        &#34;&#34;&#34;
+
+        # Assumption that needs to hold for most computations in the paper (mentioned p. 137)
+        if r &lt;= mu_G:
+            raise Exception(&#39;The interest rate must be strictly greater than the mu_G paramater.&#39;)
+
+        # This check and the one that follows ensure that there is a form of hierarchy between good and bad technologies
+        if mu_G &lt; mu_B:
+            raise Exception(&#39;Due to the &#34;hierarchy&#34; between good and the bad technologies, mu_G must be above mu_B.&#39;)
+
+        if sigma_B &lt; sigma_G:
+            raise Exception(&#39;Because the bad technology is more risky, sigma_B must be above sigma_G.&#39;)
+
+        # This check verifies a technical assumption made by authors on GBM parameters
+        if sigma_G ** 2 &gt;= ((mu_G + mu_B) / 2):
+            raise Exception(&#39;Technical assumption not satisfied (cf. page 138 of the paper).&#39;)
+
+        # # Assumption on the lambda parameter
+        # # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
+        # if (lambda_parameter &lt; 1 / (r - mu_B)) or (lambda_parameter &gt; 1 / (r - mu_G)):
+        #     error_message = &#39;Condition on the lambda parameter is not satisfied. In this case, &#39;
+        #     error_message += f&#39;value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.&#39;
+        #     raise Exception(error_message)
+
+        # # This check and the one below are related to the bank&#39;s liabilities (detailed at p. 141)
+        # if r * d / (r - mu_G) - d &lt;= 0:
+        #     raise Exception(&#39;When liquidation takes place, the book value of the bank equity must be positive.&#39;)
+
+        # if r * d * lambda_parameter &gt;= 1:
+        #     raise Exception(&#39;Liquidation should not permit the repayment of all deposits, which would not be risky.&#39;)
+
+        self.b = b
+        self.r = r
+
+        self.mu_G = mu_G
+        self.sigma_G = sigma_G
+
+        self.mu_B = mu_B
+        self.sigma_B = sigma_B
+
+        self.lambda_parameter = lambda_parameter
+
+        # This attribute will eventually be &#34;filled&#34; with the output of the simulation
+        self.simulation = None
+
+        # This attribute is eventually &#34;filled&#34; within the apply_first_best_closure method
+        self.a_G = None
+
+    def get_one_bank(self, x_0=10):
+        &#34;&#34;&#34;
+        This method allows to instantiate a bank, using economy-wide parameters.
+
+        It only requires x_0 as an argument, which corresponds to the initial cash flow level of the bank.
+
+        It returns an instance from the TypicalBank class, defined aboveself.
+        &#34;&#34;&#34;
+        return TypicalBank(x_0=x_0,
+                           b=self.b, r=self.r,
+                           mu_G=self.mu_G, sigma_G=self.sigma_G,
+                           mu_B=self.mu_B, sigma_B=self.sigma_B)
+
+    def run_simulation(self, n_banks=100,
+                       lower_x_0=2, upper_x_0=5,
+                       n_periods=200, dt=0.01,
+                       fix_random_state=False,
+                       inplace=True):
+        &#34;&#34;&#34;
+        This method is the core simulation method provided by the Economy class.
+
+        It requires several arguments:
+
+        - n_banks: the number of banks to include in the simulation;
+
+        - lower_x_0: the lower bound for the support of the uniform distribution that determines the initial cash flow
+        level of each bank;
+
+        - upper_x_0: the upper bound for the support of the uniform distribution that determines the initial cash flow
+        level of each bank;
+
+        - n_periods: the number of periods during which one wants to simulate the banks&#39; cash flows;
+
+        - dt: the timestep to be used when generating banks&#39; cash flows using geometric Brownian motions;
+
+        - fix_random_state: boolean that indicates whether to fix or not the random state of the simulation. If set to
+        True, the output of the method will be the same through a call to another; if set to False, different calls will
+        of the method will yield different outputs;
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified.
+
+        Based on these arguments and using the generate_cash_flows method of TypicalBank instances, this method instan-
+        tiate a number of banks, simulates their cash flows and determines whether they have shirked or their assets
+        have reached a negative net present value at some point in time.
+
+        It returns a DataFrame:
+
+        - indexed by banks&#39; ID, which range from 1 to n_banks;
+
+        - whose n_periods first columns (called &#34;cf_0&#34;, &#34;cf_1&#34;, etc) store the cash flow levels of each bank at each
+        point in time;
+
+        - with an additional &#34;has_shirked&#34; column which indicates whether the bank has chosen the bad technology at some
+        point in time or not;
+
+        - and a last &#34;has_shirked_or_neg_NPV&#34; which stores booleans. True indicates that the bank has either shirked or
+        reach a negative net present value at some point in time (which is possible with the good technology when cash
+        flows are insufficient to compensate for the monitoring cost).
+
+        NB: This final column is built using the NPV_check function imported from the utils module.
+        &#34;&#34;&#34;
+
+        # This attribute stores the names of columns that will contain banks&#39; cash flows in the output DataFrame
+        # It will be reused later on, eg. in apply_first_best_closure and apply_capital_requirements methods
+        self.util = [f&#39;cf_{i}&#39; for i in range(n_periods)]
+
+        # We create the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
+        ids = np.arange(1, n_banks+1)
+
+        # We instantiate void lists that will store banks&#39; cash flows and has_shirked booleans
+        all_cash_flows = []
+        has_shirkeds = []
+
+        # We distinguish two cases depending on whether we want the output to be the same through different calls
+        if fix_random_state:
+
+            # We generate the initial cash flow level of each bank fixing the random seed at 0
+            # The x_0s are determined through a continuous uniform distribution of support [lower_x_0; upper_x_0]
+            np.random.seed(0)
+            x_0s = np.random.uniform(lower_x_0, upper_x_0, size=n_banks)
+
+            # We iterate over bank IDs and the array containing the different initial cash flow levels (same length)
+            for i, x_0 in zip(ids, x_0s):
+                # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
+                bank = self.get_one_bank(x_0=x_0)
+
+                # We generate the bank&#39;s cash flows which are stored in its cash_flows attribute
+                bank.generate_cash_flows(n_periods=n_periods, dt=dt, random_seed=i)
+
+                # We append bank&#39;s cash flows and the output of the has_shirked method to related objects
+                all_cash_flows.append(bank.cash_flows)
+                has_shirkeds.append(bank.has_shirked())
+
+        else:
+            # As before, but this time without specifying any random seed, we generate initial cash flow levels
+            x_0s = np.random.uniform(lower_x_0, upper_x_0, size=len(ids))
+
+            # We iterate over bank IDs and the array containing the different initial cash flow levels (same length)
+            for i, x_0 in zip(ids, x_0s):
+                # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
+                bank = self.get_one_bank(x_0=x_0)
+
+                # We generate the bank&#39;s cash flows which are stored in its cash_flows attribute
+                bank.generate_cash_flows(n_periods=n_periods, dt=dt)
+
+                # We append bank&#39;s cash flows and the output of the has_shirked method to related objects
+                all_cash_flows.append(bank.cash_flows)
+                has_shirkeds.append(bank.has_shirked())
+
+        # In the end, all_cash_flows is a list of list and we convert this 2-dimensional object into a DataFrame
+        # (all_cash_flows contains n_banks lists of n_periods cash flow levels generated as a geometric Brownian motion)
+        df = pd.DataFrame(all_cash_flows, columns=self.util)
+
+        # We add columns of interest
+        df[&#39;bank_id&#39;] = ids
+        df[&#39;has_shirked&#39;] = has_shirkeds
+
+        # We reindex the DataFrame with banks&#39; IDs
+        df.set_index(&#39;bank_id&#39;, inplace=True)
+
+        # Based on formulas that are detailed in the paper, we compute the positive net present value threshold
+        # (If a bank using the good monitoring technology has a cash flow level below this threshold, then the NPV of
+        # its assets is non-positive as bank&#39;s cash flows cannot compensate for the cost of the monitoring technology)
+        self.nu_G = 1 / (self.r - self.mu_G)
+        threshold = self.b / (self.nu_G - self.lambda_parameter)
+
+        # We run the check to identify banks that have reached a negative net present value at some point in time
+        df[&#39;has_shirked_or_neg_NPV&#39;] = df.apply(lambda row: NPV_check(row, threshold), axis=1)
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            self.simulation = df   # simulation attribute of the Economy instance is updated
+        else:
+            return df.set_index(&#39;bank_id&#39;)   # The attribute is left unchanged and the output is directly returned
+
+    def apply_first_best_closure(self, inplace=True, verbose=1):
+        &#34;&#34;&#34;
+        Based on the formula described in Proposition 1 (page 140 of the paper), this method applies the first-best clo-
+        sure threshold of the regulator, ie. the threshold which maximizes the option value associated to the irreversi-
+        ble closure decision.
+
+        In practice, the first step is to compute this threshold using the parameters of the economy and then, a check
+        is run upon each line of the simulation DataFrame to verify, for each bank, whether its cash flows have gone
+        below the closure threshold at some point in time.
+
+        It then creates a new column, &#39;first_best_closure&#39;, which takes the value:
+
+        - True, if the bank should have been closed at some point in time based on the first-best threshold;
+
+        - False, if not.
+
+        This method takes two simple arguments:
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified;
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+        &#34;&#34;&#34;
+
+        # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
+        if self.simulation is None:
+            raise Exception(&#39;You need to first run a simulation before applying first-best closure.&#39;)
+
+        # We use the formula detailed at page 139 of the paper to compute a_G based on economy parameters
+        self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
+            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+
+        # We deduce the first-best closure threshold
+        threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation[&#39;first_best_closure&#39;] =\
+                self.simulation.apply(lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print(&#39;Simulation attribute (DataFrame) updated with the first-best closure column.&#39;)
+
+        if not inplace:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df[&#39;first_best_closure&#39;] = df.apply(lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print(&#39;Simulation attribute was left unchanged (inplace=False was passed).&#39;)
+
+            return df
+
+    def apply_capital_requirements(self, inplace=True, verbose=1):
+        &#34;&#34;&#34;
+        Based on the formula described in Proposition 2 (page 143 of the paper), this method applies the second-best
+        closure threshold of the regulator, ie. the threshold associated with the optimal capital ratio under which
+        banks have no incentive to shirk.
+
+        As above for the first-best closure, the first step is to compute the capital requirements threshold and a check
+        is then run upon each line of the simulation DataFrame to determine whether the bank&#39;s cash flows have gone be-
+        low the closure threshold at some point in time.
+
+        It then creates a new column, &#39;capital_requirements_closure&#39;, which takes the value:
+
+        - True, if the bank should have been closed based on capital requirements at some point in time;
+
+        - False, if not.
+
+        This method takes two simple arguments:
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified;
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+        &#34;&#34;&#34;
+
+        # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
+        if self.simulation is None:
+            raise Exception(&#39;You need to first run a simulation before applying capital requirements.&#39;)
+
+        # In case the apply_first_best_closure method has not been run before calling the one considered here,
+        # we need to recompute a_G based on economy parameters and thanks to the formula at page 139 of the paper
+        if self.a_G is None:
+            self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
+                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+
+        # We compute two components of the final formula related to the bad asset monitoring technology (1/2)
+        self.nu_B = 1 / (self.r - self.mu_B)
+
+        # We compute two components of the final formula related to the bad asset monitoring technology (2/2)
+        self.a_B = (1/2) + (self.mu_B / (self.sigma_B ** 2)) +\
+            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
+
+        # Again based on Proposition 2 of the paper (page 143), we verify capital requirements are needed in our case
+        if self.b &lt;= (self.r * (self.a_G * self.nu_G - self.a_B * self.nu_B) - (self.a_G - self.a_B)) / (self.a_G - 1):
+            raise Exception(
+                &#39;With the considered parameters, capital requirements regulation is not needed.&#39;
+                + &#39; &#39;
+                + &#39;This happens when the monitoring cost is not &#34;large enough&#34; - See Proposition 2 (page 143).&#39;
+            )
+
+        # We deduce from previous computations the second-best / capital requirements closure threshold
+        threshold = ((self.a_G - 1) * self.b + self.a_G - self.a_B) / (self.a_G * self.nu_G - self.a_B * self.nu_B)
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation[&#39;capital_requirements_closure&#39;] =\
+                self.simulation.apply(lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print(&#39;Simulation attribute (DataFrame) updated with the second-best closure column.&#39;)
+
+        if not inplace:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df[&#39;capital_requirements_closure&#39;] = df.apply(
+                lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1
+            )
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print(&#39;Simulation attribute was left unchanged (inplace=False was passed).&#39;)
+
+            return df</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="bank_regulation_project.economy.Economy.apply_capital_requirements"><code class="name flex">
+<span>def <span class="ident">apply_capital_requirements</span></span>(<span>self, inplace=True, verbose=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Based on the formula described in Proposition 2 (page 143 of the paper), this method applies the second-best
+closure threshold of the regulator, ie. the threshold associated with the optimal capital ratio under which
+banks have no incentive to shirk.</p>
+<p>As above for the first-best closure, the first step is to compute the capital requirements threshold and a check
+is then run upon each line of the simulation DataFrame to determine whether the bank's cash flows have gone be-
+low the closure threshold at some point in time.</p>
+<p>It then creates a new column, 'capital_requirements_closure', which takes the value:</p>
+<ul>
+<li>
+<p>True, if the bank should have been closed based on capital requirements at some point in time;</p>
+</li>
+<li>
+<p>False, if not.</p>
+</li>
+</ul>
+<p>This method takes two simple arguments:</p>
+<ul>
+<li>
+<p>inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+bute is not modified;</p>
+</li>
+<li>
+<p>verbose: determines whether to print or not a message indicating that the attributes have been updated.</p>
+</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_capital_requirements(self, inplace=True, verbose=1):
+    &#34;&#34;&#34;
+    Based on the formula described in Proposition 2 (page 143 of the paper), this method applies the second-best
+    closure threshold of the regulator, ie. the threshold associated with the optimal capital ratio under which
+    banks have no incentive to shirk.
+
+    As above for the first-best closure, the first step is to compute the capital requirements threshold and a check
+    is then run upon each line of the simulation DataFrame to determine whether the bank&#39;s cash flows have gone be-
+    low the closure threshold at some point in time.
+
+    It then creates a new column, &#39;capital_requirements_closure&#39;, which takes the value:
+
+    - True, if the bank should have been closed based on capital requirements at some point in time;
+
+    - False, if not.
+
+    This method takes two simple arguments:
+
+    - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+    without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+    bute is not modified;
+
+    - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+    &#34;&#34;&#34;
+
+    # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
+    if self.simulation is None:
+        raise Exception(&#39;You need to first run a simulation before applying capital requirements.&#39;)
+
+    # In case the apply_first_best_closure method has not been run before calling the one considered here,
+    # we need to recompute a_G based on economy parameters and thanks to the formula at page 139 of the paper
+    if self.a_G is None:
+        self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
+            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+
+    # We compute two components of the final formula related to the bad asset monitoring technology (1/2)
+    self.nu_B = 1 / (self.r - self.mu_B)
+
+    # We compute two components of the final formula related to the bad asset monitoring technology (2/2)
+    self.a_B = (1/2) + (self.mu_B / (self.sigma_B ** 2)) +\
+        np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
+
+    # Again based on Proposition 2 of the paper (page 143), we verify capital requirements are needed in our case
+    if self.b &lt;= (self.r * (self.a_G * self.nu_G - self.a_B * self.nu_B) - (self.a_G - self.a_B)) / (self.a_G - 1):
+        raise Exception(
+            &#39;With the considered parameters, capital requirements regulation is not needed.&#39;
+            + &#39; &#39;
+            + &#39;This happens when the monitoring cost is not &#34;large enough&#34; - See Proposition 2 (page 143).&#39;
+        )
+
+    # We deduce from previous computations the second-best / capital requirements closure threshold
+    threshold = ((self.a_G - 1) * self.b + self.a_G - self.a_B) / (self.a_G * self.nu_G - self.a_B * self.nu_B)
+
+    # We output the result, in two different ways depending on the inplace argument
+    if inplace:
+        # simulation attribute of the Economy instance is updated
+        self.simulation[&#39;capital_requirements_closure&#39;] =\
+            self.simulation.apply(lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1)
+
+        # We print or not the related message depending on the verbose argument
+        if verbose:
+            print(&#39;Simulation attribute (DataFrame) updated with the second-best closure column.&#39;)
+
+    if not inplace:
+        # The attribute is left unchanged and the output is directly returned
+        df = self.simulation.copy()
+        df[&#39;capital_requirements_closure&#39;] = df.apply(
+            lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1
+        )
+
+        # We print or not the related message depending on the verbose argument
+        if verbose:
+            print(&#39;Simulation attribute was left unchanged (inplace=False was passed).&#39;)
+
+        return df</code></pre>
+</details>
+</dd>
+<dt id="bank_regulation_project.economy.Economy.apply_first_best_closure"><code class="name flex">
+<span>def <span class="ident">apply_first_best_closure</span></span>(<span>self, inplace=True, verbose=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Based on the formula described in Proposition 1 (page 140 of the paper), this method applies the first-best clo-
+sure threshold of the regulator, ie. the threshold which maximizes the option value associated to the irreversi-
+ble closure decision.</p>
+<p>In practice, the first step is to compute this threshold using the parameters of the economy and then, a check
+is run upon each line of the simulation DataFrame to verify, for each bank, whether its cash flows have gone
+below the closure threshold at some point in time.</p>
+<p>It then creates a new column, 'first_best_closure', which takes the value:</p>
+<ul>
+<li>
+<p>True, if the bank should have been closed at some point in time based on the first-best threshold;</p>
+</li>
+<li>
+<p>False, if not.</p>
+</li>
+</ul>
+<p>This method takes two simple arguments:</p>
+<ul>
+<li>
+<p>inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+bute is not modified;</p>
+</li>
+<li>
+<p>verbose: determines whether to print or not a message indicating that the attributes have been updated.</p>
+</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_first_best_closure(self, inplace=True, verbose=1):
+    &#34;&#34;&#34;
+    Based on the formula described in Proposition 1 (page 140 of the paper), this method applies the first-best clo-
+    sure threshold of the regulator, ie. the threshold which maximizes the option value associated to the irreversi-
+    ble closure decision.
+
+    In practice, the first step is to compute this threshold using the parameters of the economy and then, a check
+    is run upon each line of the simulation DataFrame to verify, for each bank, whether its cash flows have gone
+    below the closure threshold at some point in time.
+
+    It then creates a new column, &#39;first_best_closure&#39;, which takes the value:
+
+    - True, if the bank should have been closed at some point in time based on the first-best threshold;
+
+    - False, if not.
+
+    This method takes two simple arguments:
+
+    - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+    without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+    bute is not modified;
+
+    - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+    &#34;&#34;&#34;
+
+    # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
+    if self.simulation is None:
+        raise Exception(&#39;You need to first run a simulation before applying first-best closure.&#39;)
+
+    # We use the formula detailed at page 139 of the paper to compute a_G based on economy parameters
+    self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
+        np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+
+    # We deduce the first-best closure threshold
+    threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
+
+    # We output the result, in two different ways depending on the inplace argument
+    if inplace:
+        # simulation attribute of the Economy instance is updated
+        self.simulation[&#39;first_best_closure&#39;] =\
+            self.simulation.apply(lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1)
+
+        # We print or not the related message depending on the verbose argument
+        if verbose:
+            print(&#39;Simulation attribute (DataFrame) updated with the first-best closure column.&#39;)
+
+    if not inplace:
+        # The attribute is left unchanged and the output is directly returned
+        df = self.simulation.copy()
+        df[&#39;first_best_closure&#39;] = df.apply(lambda row: (row.loc[self.util] &lt;= threshold).sum() &gt; 0, axis=1)
+
+        # We print or not the related message depending on the verbose argument
+        if verbose:
+            print(&#39;Simulation attribute was left unchanged (inplace=False was passed).&#39;)
+
+        return df</code></pre>
+</details>
+</dd>
+<dt id="bank_regulation_project.economy.Economy.get_one_bank"><code class="name flex">
+<span>def <span class="ident">get_one_bank</span></span>(<span>self, x_0=10)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This method allows to instantiate a bank, using economy-wide parameters.</p>
+<p>It only requires x_0 as an argument, which corresponds to the initial cash flow level of the bank.</p>
+<p>It returns an instance from the TypicalBank class, defined aboveself.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_one_bank(self, x_0=10):
+    &#34;&#34;&#34;
+    This method allows to instantiate a bank, using economy-wide parameters.
+
+    It only requires x_0 as an argument, which corresponds to the initial cash flow level of the bank.
+
+    It returns an instance from the TypicalBank class, defined aboveself.
+    &#34;&#34;&#34;
+    return TypicalBank(x_0=x_0,
+                       b=self.b, r=self.r,
+                       mu_G=self.mu_G, sigma_G=self.sigma_G,
+                       mu_B=self.mu_B, sigma_B=self.sigma_B)</code></pre>
+</details>
+</dd>
+<dt id="bank_regulation_project.economy.Economy.run_simulation"><code class="name flex">
+<span>def <span class="ident">run_simulation</span></span>(<span>self, n_banks=100, lower_x_0=2, upper_x_0=5, n_periods=200, dt=0.01, fix_random_state=False, inplace=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This method is the core simulation method provided by the Economy class.</p>
+<p>It requires several arguments:</p>
+<ul>
+<li>
+<p>n_banks: the number of banks to include in the simulation;</p>
+</li>
+<li>
+<p>lower_x_0: the lower bound for the support of the uniform distribution that determines the initial cash flow
+level of each bank;</p>
+</li>
+<li>
+<p>upper_x_0: the upper bound for the support of the uniform distribution that determines the initial cash flow
+level of each bank;</p>
+</li>
+<li>
+<p>n_periods: the number of periods during which one wants to simulate the banks' cash flows;</p>
+</li>
+<li>
+<p>dt: the timestep to be used when generating banks' cash flows using geometric Brownian motions;</p>
+</li>
+<li>
+<p>fix_random_state: boolean that indicates whether to fix or not the random state of the simulation. If set to
+True, the output of the method will be the same through a call to another; if set to False, different calls will
+of the method will yield different outputs;</p>
+</li>
+<li>
+<p>inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+bute is not modified.</p>
+</li>
+</ul>
+<p>Based on these arguments and using the generate_cash_flows method of TypicalBank instances, this method instan-
+tiate a number of banks, simulates their cash flows and determines whether they have shirked or their assets
+have reached a negative net present value at some point in time.</p>
+<p>It returns a DataFrame:</p>
+<ul>
+<li>
+<p>indexed by banks' ID, which range from 1 to n_banks;</p>
+</li>
+<li>
+<p>whose n_periods first columns (called "cf_0", "cf_1", etc) store the cash flow levels of each bank at each
+point in time;</p>
+</li>
+<li>
+<p>with an additional "has_shirked" column which indicates whether the bank has chosen the bad technology at some
+point in time or not;</p>
+</li>
+<li>
+<p>and a last "has_shirked_or_neg_NPV" which stores booleans. True indicates that the bank has either shirked or
+reach a negative net present value at some point in time (which is possible with the good technology when cash
+flows are insufficient to compensate for the monitoring cost).</p>
+</li>
+</ul>
+<p>NB: This final column is built using the NPV_check function imported from the utils module.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_simulation(self, n_banks=100,
+                   lower_x_0=2, upper_x_0=5,
+                   n_periods=200, dt=0.01,
+                   fix_random_state=False,
+                   inplace=True):
+    &#34;&#34;&#34;
+    This method is the core simulation method provided by the Economy class.
+
+    It requires several arguments:
+
+    - n_banks: the number of banks to include in the simulation;
+
+    - lower_x_0: the lower bound for the support of the uniform distribution that determines the initial cash flow
+    level of each bank;
+
+    - upper_x_0: the upper bound for the support of the uniform distribution that determines the initial cash flow
+    level of each bank;
+
+    - n_periods: the number of periods during which one wants to simulate the banks&#39; cash flows;
+
+    - dt: the timestep to be used when generating banks&#39; cash flows using geometric Brownian motions;
+
+    - fix_random_state: boolean that indicates whether to fix or not the random state of the simulation. If set to
+    True, the output of the method will be the same through a call to another; if set to False, different calls will
+    of the method will yield different outputs;
+
+    - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+    without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+    bute is not modified.
+
+    Based on these arguments and using the generate_cash_flows method of TypicalBank instances, this method instan-
+    tiate a number of banks, simulates their cash flows and determines whether they have shirked or their assets
+    have reached a negative net present value at some point in time.
+
+    It returns a DataFrame:
+
+    - indexed by banks&#39; ID, which range from 1 to n_banks;
+
+    - whose n_periods first columns (called &#34;cf_0&#34;, &#34;cf_1&#34;, etc) store the cash flow levels of each bank at each
+    point in time;
+
+    - with an additional &#34;has_shirked&#34; column which indicates whether the bank has chosen the bad technology at some
+    point in time or not;
+
+    - and a last &#34;has_shirked_or_neg_NPV&#34; which stores booleans. True indicates that the bank has either shirked or
+    reach a negative net present value at some point in time (which is possible with the good technology when cash
+    flows are insufficient to compensate for the monitoring cost).
+
+    NB: This final column is built using the NPV_check function imported from the utils module.
+    &#34;&#34;&#34;
+
+    # This attribute stores the names of columns that will contain banks&#39; cash flows in the output DataFrame
+    # It will be reused later on, eg. in apply_first_best_closure and apply_capital_requirements methods
+    self.util = [f&#39;cf_{i}&#39; for i in range(n_periods)]
+
+    # We create the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
+    ids = np.arange(1, n_banks+1)
+
+    # We instantiate void lists that will store banks&#39; cash flows and has_shirked booleans
+    all_cash_flows = []
+    has_shirkeds = []
+
+    # We distinguish two cases depending on whether we want the output to be the same through different calls
+    if fix_random_state:
+
+        # We generate the initial cash flow level of each bank fixing the random seed at 0
+        # The x_0s are determined through a continuous uniform distribution of support [lower_x_0; upper_x_0]
+        np.random.seed(0)
+        x_0s = np.random.uniform(lower_x_0, upper_x_0, size=n_banks)
+
+        # We iterate over bank IDs and the array containing the different initial cash flow levels (same length)
+        for i, x_0 in zip(ids, x_0s):
+            # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
+            bank = self.get_one_bank(x_0=x_0)
+
+            # We generate the bank&#39;s cash flows which are stored in its cash_flows attribute
+            bank.generate_cash_flows(n_periods=n_periods, dt=dt, random_seed=i)
+
+            # We append bank&#39;s cash flows and the output of the has_shirked method to related objects
+            all_cash_flows.append(bank.cash_flows)
+            has_shirkeds.append(bank.has_shirked())
+
+    else:
+        # As before, but this time without specifying any random seed, we generate initial cash flow levels
+        x_0s = np.random.uniform(lower_x_0, upper_x_0, size=len(ids))
+
+        # We iterate over bank IDs and the array containing the different initial cash flow levels (same length)
+        for i, x_0 in zip(ids, x_0s):
+            # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
+            bank = self.get_one_bank(x_0=x_0)
+
+            # We generate the bank&#39;s cash flows which are stored in its cash_flows attribute
+            bank.generate_cash_flows(n_periods=n_periods, dt=dt)
+
+            # We append bank&#39;s cash flows and the output of the has_shirked method to related objects
+            all_cash_flows.append(bank.cash_flows)
+            has_shirkeds.append(bank.has_shirked())
+
+    # In the end, all_cash_flows is a list of list and we convert this 2-dimensional object into a DataFrame
+    # (all_cash_flows contains n_banks lists of n_periods cash flow levels generated as a geometric Brownian motion)
+    df = pd.DataFrame(all_cash_flows, columns=self.util)
+
+    # We add columns of interest
+    df[&#39;bank_id&#39;] = ids
+    df[&#39;has_shirked&#39;] = has_shirkeds
+
+    # We reindex the DataFrame with banks&#39; IDs
+    df.set_index(&#39;bank_id&#39;, inplace=True)
+
+    # Based on formulas that are detailed in the paper, we compute the positive net present value threshold
+    # (If a bank using the good monitoring technology has a cash flow level below this threshold, then the NPV of
+    # its assets is non-positive as bank&#39;s cash flows cannot compensate for the cost of the monitoring technology)
+    self.nu_G = 1 / (self.r - self.mu_G)
+    threshold = self.b / (self.nu_G - self.lambda_parameter)
+
+    # We run the check to identify banks that have reached a negative net present value at some point in time
+    df[&#39;has_shirked_or_neg_NPV&#39;] = df.apply(lambda row: NPV_check(row, threshold), axis=1)
+
+    # We output the result, in two different ways depending on the inplace argument
+    if inplace:
+        self.simulation = df   # simulation attribute of the Economy instance is updated
+    else:
+        return df.set_index(&#39;bank_id&#39;)   # The attribute is left unchanged and the output is directly returned</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="bank_regulation_project.economy.TypicalBank"><code class="flex name class">
+<span>class <span class="ident">TypicalBank</span></span>
+<span>(</span><span>x_0, b, r, mu_G, sigma_G, mu_B, sigma_B)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This is the instantiation method for the TypicalBank class.</p>
+<p>It requires as arguments:</p>
+<ul>
+<li>
+<p>x_0: the initial value of the bank's cash flows;</p>
+</li>
+<li>
+<p>b: the monitoring cost associated with the good asset management technology;</p>
+</li>
+<li>
+<p>r: the interest rate;</p>
+</li>
+<li>
+<p>mu_G: the instantaneous drift associated with the good asset management technology;</p>
+</li>
+<li>
+<p>mu_B: the instantaneous drift associated with the bad asset management technology;</p>
+</li>
+<li>
+<p>sigma_G: the instantaneous variance associated with the good asset management technology;</p>
+</li>
+<li>
+<p>sigma_B: the instantaneous variance associated with the bad asset management technology.</p>
+</li>
+</ul>
+<p>Based on these parameters, the expected present value of the bank's cash flows from time 0 onwards is computed
+for both the good and the bad technologies, so as to determine with what technology the bank starts.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TypicalBank:
+
+    def __init__(self, x_0, b, r, mu_G, sigma_G, mu_B, sigma_B):
+        &#34;&#34;&#34;
+        This is the instantiation method for the TypicalBank class.
+
+        It requires as arguments:
+
+        - x_0: the initial value of the bank&#39;s cash flows;
+
+        - b: the monitoring cost associated with the good asset management technology;
+
+        - r: the interest rate;
+
+        - mu_G: the instantaneous drift associated with the good asset management technology;
+
+        - mu_B: the instantaneous drift associated with the bad asset management technology;
+
+        - sigma_G: the instantaneous variance associated with the good asset management technology;
+
+        - sigma_B: the instantaneous variance associated with the bad asset management technology.
+
+        Based on these parameters, the expected present value of the bank&#39;s cash flows from time 0 onwards is computed
+        for both the good and the bad technologies, so as to determine with what technology the bank starts.
+        &#34;&#34;&#34;
+        self.cash_flows = [x_0]
+
+        self.b = b
+        self.r = r
+
+        self.mu_G = mu_G
+        self.sigma_G = sigma_G
+
+        self.mu_B = mu_B
+        self.sigma_B = sigma_B
+
+        # We compare the expected present value of the bank&#39;s cash flows with the good and the bad technology
+        if (x_0 / (self.r - self.mu_G) - self.b) &gt;= (x_0 / (self.r - self.mu_B)):
+
+            # If condition is satisfied, the bank first chooses the good asset management technology
+            self.technology_choices = [&#39;good&#39;]
+
+        else:
+
+            # If condition is not satisfied, the bank first chooses the bad asset management technology
+            self.technology_choices = [&#39;bad&#39;]
+
+    def generate_cash_flows(self, n_periods=200, dt=0.01, random_seed=None, verbose=0):
+        &#34;&#34;&#34;
+        This method allows to simulate the cash flows of the bank.
+
+        It does not return any output but modifies the &#34;cash_flows&#34; and &#34;technology_choices&#34; attribute of the instance
+        of the TypicalBank class considered.
+
+        It takes as arguments:
+
+        - n_periods: the number of time increments covered by the simulation (cash flows composed of n_periods values);
+
+        - dt: the length of each time step which is used to simulate a Geometric Brownian motion as a discrete sequence;
+
+        - random_seed: an integer that allows to pre-determine the &#34;state of the world&#34; for the simulation (ie. several
+        simulations with the same random seed yield the same output);
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+
+        In order to run the simulation, this function relies on the generate_GBM function, imported from utils.py and
+        called at each time increment. We cannot generate directly a n_periods-long cash flow series since at any point
+        in time, the bank should have the possibility to &#34;shirk&#34;, ie. to move from the good to the bad technology.
+        &#34;&#34;&#34;
+
+        # If a random seed is specified, this means that we want the same output each time we call this method
+        if random_seed is not None:
+            # To do so, we use the provided random seed to generate (the draw is random but we will always obtain the
+            # same with a given seed) n_periods random seeds which will be used when calling the generate_GBM function
+            np.random.seed(random_seed)
+            random_seeds = np.random.randint(1, 1000000, size=n_periods)
+
+        # We iterate to simulate a n_periods-long geometric Brownian motion
+        for i in range(n_periods-1):
+            # We fetch the current technology choice of the bank from the related instance attribute
+            technology = self.technology_choices[-1]
+
+            # We use this technology choice to determine what mu and sigma to use at this time step
+            if technology == &#39;good&#39;:
+                mu = self.mu_G
+                sigma = self.sigma_G
+            else:
+                mu = self.mu_B
+                sigma = self.sigma_B
+
+            # We fetch the current level of cash flows of the bank from the related instance attribute
+            x_t = self.cash_flows[-1]
+
+            # Here, we distinguish two cases depending on whether a random seed was specified or not
+            if random_seed is not None:
+
+                # We use the n-periods random seeds we have generated to determine the &#34;state of the world&#34; in which
+                # the simulation of the geometric Brownian motion at the (i+1)-th time step occurs
+                gbm_draw = generate_GBM(mu=mu, sigma=sigma, n=1, dt=dt, x_0=x_t, random_seed=random_seeds[i])[-1]
+
+            else:
+
+                # Here, we do not specify any random seed and let the generate_GBM function run undeterministically
+                gbm_draw = generate_GBM(mu=mu, sigma=sigma, n=1, dt=dt, x_0=x_t)[-1]
+
+            # We append the new cash flow level of the bank to its cash_flows attribute
+            self.cash_flows.append(gbm_draw)
+
+            # And we determine the next technology choice of the bank based on this cash_flow level
+            if (self.cash_flows[-1] / (self.r - self.mu_G) - self.b) &gt; (self.cash_flows[-1] / (self.r - self.mu_B)):
+                self.technology_choices.append(&#39;good&#39;)
+            else:
+                self.technology_choices.append(&#39;bad&#39;)
+
+        if verbose:
+            print(&#39;Cash-flow and technology choice attributes were updated.&#39;)
+
+    def plot_cash_flows(self):
+        &#34;&#34;&#34;
+        This method allows to rapidly plot the cash flows of the bank.
+
+        It does not require any argument but runs a check to verify that cash flows have been generated beforehand.
+        &#34;&#34;&#34;
+
+        # This check ensures that some cash flows have been generated beforehand
+        if len(self.cash_flows) == 1:
+            raise Exception(&#34;Run a simulation of the bank&#39;s cash flows before plotting them.&#34;)
+
+        # We simply output a lineplot of the bank&#39;s cash flows (the x-axis corresponding to periods)
+        plt.plot(self.cash_flows)
+        plt.show()
+
+    def has_shirked(self):
+        &#34;&#34;&#34;
+        This method allows to check whether a bank has shirked, ie. has chosen the bad technology at some point in time,
+        or not.
+
+        It does not require any argument and outputs a boolean which is:
+
+        - True: the bank has shirked, ie. has chosen the bad technology at some point in time;
+        - False: the bank has not shirked and kept running with the good technology throughout time.
+
+        NB: Here, we do not run any check to verify for instance whether cash flows have been generated in the first
+        place because the first cash flow level, x_0, is determined at the instantiation of the bank and if low enough,
+        can potentially induce the bank to choose the bad technology from start.
+        &#34;&#34;&#34;
+        return (&#39;bad&#39; in self.technology_choices)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="bank_regulation_project.economy.TypicalBank.generate_cash_flows"><code class="name flex">
+<span>def <span class="ident">generate_cash_flows</span></span>(<span>self, n_periods=200, dt=0.01, random_seed=None, verbose=0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This method allows to simulate the cash flows of the bank.</p>
+<p>It does not return any output but modifies the "cash_flows" and "technology_choices" attribute of the instance
+of the TypicalBank class considered.</p>
+<p>It takes as arguments:</p>
+<ul>
+<li>
+<p>n_periods: the number of time increments covered by the simulation (cash flows composed of n_periods values);</p>
+</li>
+<li>
+<p>dt: the length of each time step which is used to simulate a Geometric Brownian motion as a discrete sequence;</p>
+</li>
+<li>
+<p>random_seed: an integer that allows to pre-determine the "state of the world" for the simulation (ie. several
+simulations with the same random seed yield the same output);</p>
+</li>
+<li>
+<p>verbose: determines whether to print or not a message indicating that the attributes have been updated.</p>
+</li>
+</ul>
+<p>In order to run the simulation, this function relies on the generate_GBM function, imported from utils.py and
+called at each time increment. We cannot generate directly a n_periods-long cash flow series since at any point
+in time, the bank should have the possibility to "shirk", ie. to move from the good to the bad technology.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_cash_flows(self, n_periods=200, dt=0.01, random_seed=None, verbose=0):
+    &#34;&#34;&#34;
+    This method allows to simulate the cash flows of the bank.
+
+    It does not return any output but modifies the &#34;cash_flows&#34; and &#34;technology_choices&#34; attribute of the instance
+    of the TypicalBank class considered.
+
+    It takes as arguments:
+
+    - n_periods: the number of time increments covered by the simulation (cash flows composed of n_periods values);
+
+    - dt: the length of each time step which is used to simulate a Geometric Brownian motion as a discrete sequence;
+
+    - random_seed: an integer that allows to pre-determine the &#34;state of the world&#34; for the simulation (ie. several
+    simulations with the same random seed yield the same output);
+
+    - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+
+    In order to run the simulation, this function relies on the generate_GBM function, imported from utils.py and
+    called at each time increment. We cannot generate directly a n_periods-long cash flow series since at any point
+    in time, the bank should have the possibility to &#34;shirk&#34;, ie. to move from the good to the bad technology.
+    &#34;&#34;&#34;
+
+    # If a random seed is specified, this means that we want the same output each time we call this method
+    if random_seed is not None:
+        # To do so, we use the provided random seed to generate (the draw is random but we will always obtain the
+        # same with a given seed) n_periods random seeds which will be used when calling the generate_GBM function
+        np.random.seed(random_seed)
+        random_seeds = np.random.randint(1, 1000000, size=n_periods)
+
+    # We iterate to simulate a n_periods-long geometric Brownian motion
+    for i in range(n_periods-1):
+        # We fetch the current technology choice of the bank from the related instance attribute
+        technology = self.technology_choices[-1]
+
+        # We use this technology choice to determine what mu and sigma to use at this time step
+        if technology == &#39;good&#39;:
+            mu = self.mu_G
+            sigma = self.sigma_G
+        else:
+            mu = self.mu_B
+            sigma = self.sigma_B
+
+        # We fetch the current level of cash flows of the bank from the related instance attribute
+        x_t = self.cash_flows[-1]
+
+        # Here, we distinguish two cases depending on whether a random seed was specified or not
+        if random_seed is not None:
+
+            # We use the n-periods random seeds we have generated to determine the &#34;state of the world&#34; in which
+            # the simulation of the geometric Brownian motion at the (i+1)-th time step occurs
+            gbm_draw = generate_GBM(mu=mu, sigma=sigma, n=1, dt=dt, x_0=x_t, random_seed=random_seeds[i])[-1]
+
+        else:
+
+            # Here, we do not specify any random seed and let the generate_GBM function run undeterministically
+            gbm_draw = generate_GBM(mu=mu, sigma=sigma, n=1, dt=dt, x_0=x_t)[-1]
+
+        # We append the new cash flow level of the bank to its cash_flows attribute
+        self.cash_flows.append(gbm_draw)
+
+        # And we determine the next technology choice of the bank based on this cash_flow level
+        if (self.cash_flows[-1] / (self.r - self.mu_G) - self.b) &gt; (self.cash_flows[-1] / (self.r - self.mu_B)):
+            self.technology_choices.append(&#39;good&#39;)
+        else:
+            self.technology_choices.append(&#39;bad&#39;)
+
+    if verbose:
+        print(&#39;Cash-flow and technology choice attributes were updated.&#39;)</code></pre>
+</details>
+</dd>
+<dt id="bank_regulation_project.economy.TypicalBank.has_shirked"><code class="name flex">
+<span>def <span class="ident">has_shirked</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This method allows to check whether a bank has shirked, ie. has chosen the bad technology at some point in time,
+or not.</p>
+<p>It does not require any argument and outputs a boolean which is:</p>
+<ul>
+<li>True: the bank has shirked, ie. has chosen the bad technology at some point in time;</li>
+<li>False: the bank has not shirked and kept running with the good technology throughout time.</li>
+</ul>
+<p>NB: Here, we do not run any check to verify for instance whether cash flows have been generated in the first
+place because the first cash flow level, x_0, is determined at the instantiation of the bank and if low enough,
+can potentially induce the bank to choose the bad technology from start.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def has_shirked(self):
+    &#34;&#34;&#34;
+    This method allows to check whether a bank has shirked, ie. has chosen the bad technology at some point in time,
+    or not.
+
+    It does not require any argument and outputs a boolean which is:
+
+    - True: the bank has shirked, ie. has chosen the bad technology at some point in time;
+    - False: the bank has not shirked and kept running with the good technology throughout time.
+
+    NB: Here, we do not run any check to verify for instance whether cash flows have been generated in the first
+    place because the first cash flow level, x_0, is determined at the instantiation of the bank and if low enough,
+    can potentially induce the bank to choose the bad technology from start.
+    &#34;&#34;&#34;
+    return (&#39;bad&#39; in self.technology_choices)</code></pre>
+</details>
+</dd>
+<dt id="bank_regulation_project.economy.TypicalBank.plot_cash_flows"><code class="name flex">
+<span>def <span class="ident">plot_cash_flows</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This method allows to rapidly plot the cash flows of the bank.</p>
+<p>It does not require any argument but runs a check to verify that cash flows have been generated beforehand.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def plot_cash_flows(self):
+    &#34;&#34;&#34;
+    This method allows to rapidly plot the cash flows of the bank.
+
+    It does not require any argument but runs a check to verify that cash flows have been generated beforehand.
+    &#34;&#34;&#34;
+
+    # This check ensures that some cash flows have been generated beforehand
+    if len(self.cash_flows) == 1:
+        raise Exception(&#34;Run a simulation of the bank&#39;s cash flows before plotting them.&#34;)
+
+    # We simply output a lineplot of the bank&#39;s cash flows (the x-axis corresponding to periods)
+    plt.plot(self.cash_flows)
+    plt.show()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="bank_regulation_project" href="index.html">bank_regulation_project</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="bank_regulation_project.economy.Economy" href="#bank_regulation_project.economy.Economy">Economy</a></code></h4>
+<ul class="">
+<li><code><a title="bank_regulation_project.economy.Economy.apply_capital_requirements" href="#bank_regulation_project.economy.Economy.apply_capital_requirements">apply_capital_requirements</a></code></li>
+<li><code><a title="bank_regulation_project.economy.Economy.apply_first_best_closure" href="#bank_regulation_project.economy.Economy.apply_first_best_closure">apply_first_best_closure</a></code></li>
+<li><code><a title="bank_regulation_project.economy.Economy.get_one_bank" href="#bank_regulation_project.economy.Economy.get_one_bank">get_one_bank</a></code></li>
+<li><code><a title="bank_regulation_project.economy.Economy.run_simulation" href="#bank_regulation_project.economy.Economy.run_simulation">run_simulation</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="bank_regulation_project.economy.TypicalBank" href="#bank_regulation_project.economy.TypicalBank">TypicalBank</a></code></h4>
+<ul class="">
+<li><code><a title="bank_regulation_project.economy.TypicalBank.generate_cash_flows" href="#bank_regulation_project.economy.TypicalBank.generate_cash_flows">generate_cash_flows</a></code></li>
+<li><code><a title="bank_regulation_project.economy.TypicalBank.has_shirked" href="#bank_regulation_project.economy.TypicalBank.has_shirked">has_shirked</a></code></li>
+<li><code><a title="bank_regulation_project.economy.TypicalBank.plot_cash_flows" href="#bank_regulation_project.economy.TypicalBank.plot_cash_flows">plot_cash_flows</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

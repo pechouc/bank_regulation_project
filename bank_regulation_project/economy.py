@@ -1,9 +1,27 @@
+"""
+This module is the central one in the bank regulation project.
+
+It defines two classes, TypicalBank and Economy, whose methods we use to run simulations.
+
+Formulas, assumptions and economic interpretations used throughout the file are taken from "The three pillars of Basel
+II: optimizing the mix", a paper published by Jean-Paul Decamps, Jean-Charles Rochet and Benoît Roger in the "Journal of
+Financial Intermediation" in 2002.
+
+Details about how the simulations are conceived can be found in the description of each class and of related methods.
+"""
+
+# ----------------------------------------------------------------------------------------------------------------------
+# IMPORTS
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from utils import generate_GBM, NPV_check
+from bank_regulation_project.utils import generate_GBM, NPV_check
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+# CONTENT
 
 class TypicalBank:
 
@@ -198,19 +216,19 @@ class Economy:
         if sigma_G ** 2 >= ((mu_G + mu_B) / 2):
             raise Exception('Technical assumption not satisfied (cf. page 138 of the paper).')
 
-        # Assumption on the lambda parameter
-        # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
-        if (lambda_parameter < 1 / (r - mu_B)) or (lambda_parameter > 1 / (r - mu_G)):
-            error_message = 'Condition on the lambda parameter is not satisfied. In this case, '
-            error_message += f'value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.'
-            raise Exception(error_message)
+        # # Assumption on the lambda parameter
+        # # Eg., the lower bound implies that closure is always preferable to letting a bank run with the bad technology
+        # if (lambda_parameter < 1 / (r - mu_B)) or (lambda_parameter > 1 / (r - mu_G)):
+        #     error_message = 'Condition on the lambda parameter is not satisfied. In this case, '
+        #     error_message += f'value must lie between {round(1 / (r - mu_B), 2)} and {round(1 / (r - mu_G), 2)}.'
+        #     raise Exception(error_message)
 
-        # This check and the one below are related to the bank's liabilities (detailed at p. 141)
-        if r * d / (r - mu_G) - d <= 0:
-            raise Exception('When liquidation takes place, the book value of the bank equity must be positive.')
+        # # This check and the one below are related to the bank's liabilities (detailed at p. 141)
+        # if r * d / (r - mu_G) - d <= 0:
+        #     raise Exception('When liquidation takes place, the book value of the bank equity must be positive.')
 
-        if r * d * lambda_parameter >= 1:
-            raise Exception('Liquidation should not permit the repayment of all deposits, which would not be risky.')
+        # if r * d * lambda_parameter >= 1:
+        #     raise Exception('Liquidation should not permit the repayment of all deposits, which would not be risky.')
 
         self.b = b
         self.r = r
@@ -367,34 +385,134 @@ class Economy:
             return df.set_index('bank_id')   # The attribute is left unchanged and the output is directly returned
 
     def apply_first_best_closure(self, inplace=True, verbose=1):
+        """
+        Based on the formula described in Proposition 1 (page 140 of the paper), this method applies the first-best clo-
+        sure threshold of the regulator, ie. the threshold which maximizes the option value associated to the irreversi-
+        ble closure decision.
+
+        In practice, the first step is to compute this threshold using the parameters of the economy and then, a check
+        is run upon each line of the simulation DataFrame to verify, for each bank, whether its cash flows have gone
+        below the closure threshold at some point in time.
+
+        It then creates a new column, 'first_best_closure', which takes the value:
+
+        - True, if the bank should have been closed at some point in time based on the first-best threshold;
+
+        - False, if not.
+
+        This method takes two simple arguments:
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified;
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+        """
+
+        # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
         if self.simulation is None:
             raise Exception('You need to first run a simulation before applying first-best closure.')
 
+        # We use the formula detailed at page 139 of the paper to compute a_G based on economy parameters
         self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
             np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
+        # We deduce the first-best closure threshold
         threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
 
-        self.simulation['first_best_closure'] =\
-            self.simulation.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation['first_best_closure'] =\
+                self.simulation.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
 
-        if verbose:
-            print('Simulation attribute (DataFrame) updated with the first best closure column.')
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute (DataFrame) updated with the first-best closure column.')
+
+        if not inplace:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df['first_best_closure'] = df.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute was left unchanged (inplace=False was passed).')
+
+            return df
 
     def apply_capital_requirements(self, inplace=True, verbose=1):
+        """
+        Based on the formula described in Proposition 2 (page 143 of the paper), this method applies the second-best
+        closure threshold of the regulator, ie. the threshold associated with the optimal capital ratio under which
+        banks have no incentive to shirk.
+
+        As above for the first-best closure, the first step is to compute the capital requirements threshold and a check
+        is then run upon each line of the simulation DataFrame to determine whether the bank's cash flows have gone be-
+        low the closure threshold at some point in time.
+
+        It then creates a new column, 'capital_requirements_closure', which takes the value:
+
+        - True, if the bank should have been closed based on capital requirements at some point in time;
+
+        - False, if not.
+
+        This method takes two simple arguments:
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified;
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated.
+        """
+
+        # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
+        if self.simulation is None:
+            raise Exception('You need to first run a simulation before applying capital requirements.')
+
+        # In case the apply_first_best_closure method has not been run before calling the one considered here,
+        # we need to recompute a_G based on economy parameters and thanks to the formula at page 139 of the paper
         if self.a_G is None:
             self.a_G = (1/2) + (self.mu_G / (self.sigma_G ** 2)) +\
                 np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
 
+        # We compute two components of the final formula related to the bad asset monitoring technology (1/2)
         self.nu_B = 1 / (self.r - self.mu_B)
 
+        # We compute two components of the final formula related to the bad asset monitoring technology (2/2)
         self.a_B = (1/2) + (self.mu_B / (self.sigma_B ** 2)) +\
             np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1/2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
 
+        # Again based on Proposition 2 of the paper (page 143), we verify capital requirements are needed in our case
+        if self.b <= (self.r * (self.a_G * self.nu_G - self.a_B * self.nu_B) - (self.a_G - self.a_B)) / (self.a_G - 1):
+            raise Exception(
+                'With the considered parameters, capital requirements regulation is not needed.'
+                + ' '
+                + 'This happens when the monitoring cost is not "large enough" - See Proposition 2 (page 143).'
+            )
+
+        # We deduce from previous computations the second-best / capital requirements closure threshold
         threshold = ((self.a_G - 1) * self.b + self.a_G - self.a_B) / (self.a_G * self.nu_G - self.a_B * self.nu_B)
 
-        self.simulation['capital_requirements_closure'] =\
-            self.simulation.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation['capital_requirements_closure'] =\
+                self.simulation.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
 
-        if verbose:
-            print('Simulation attribute (DataFrame) updated with the "capital_requirements_closure" column.')
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute (DataFrame) updated with the second-best closure column.')
+
+        if not inplace:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df['capital_requirements_closure'] = df.apply(
+                lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1
+            )
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute was left unchanged (inplace=False was passed).')
+
+            return df
