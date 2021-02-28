@@ -66,7 +66,7 @@ def generate_GBM(mu, sigma, n=50, dt=0.1, x_0=10, random_seed=None):
     return x
 
 
-def NPV_check(row, threshold):
+def NPV_check(row, threshold, under_macro_shock=False, column_indices=None):
     """
     This function is a very brief one used in the apply method of the simulation DataFrame in the run_simulation method
     of an Economy instance (cf. the economy.py file).
@@ -86,7 +86,31 @@ def NPV_check(row, threshold):
 
     - False, if none of the two conditions is met.
     """
-    if row['has_shirked']:
-        return True
-    else:
-        return (row.iloc[:-1] <= threshold).sum() > 0
+    if not under_macro_shock:
+        if row['has_shirked']:
+            return True
+        else:
+            return (row.iloc[:-1] <= threshold).sum() > 0
+
+    if under_macro_shock:
+        if row['has_shirked_under_shock']:
+            return True
+        else:
+            return (row.loc[column_indices] <= threshold).sum() > 0
+
+
+def get_a_exponent(mu, sigma, r):
+    """
+    This function allows to compute the a_G or a_B exponent defined in the paper, at page 139 for the first time.
+
+    It requires as arguments:
+
+    - mu: the instantaneous drift of the geometric Brownian motion considered;
+
+    - sigma: the instantaneous variance of the geometric Brownian motion considered;
+
+    - r: the interest rate assumed for the economy.
+
+    It then computes and returns the scalar used for instance in the computation of regulator's liquidation thresholds.
+    """
+    return (1 / 2) + (mu / (sigma ** 2)) + np.sqrt(((mu / (sigma ** 2)) - (1 / 2)) ** 2 + (2 * r) / (sigma ** 2))

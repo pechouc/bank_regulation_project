@@ -16,8 +16,9 @@ Details about how the simulations are conceived can be found in the description 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
-from bank_regulation_project.utils import generate_GBM, NPV_check
+from bank_regulation_project.utils import generate_GBM, NPV_check, get_a_exponent
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -247,6 +248,13 @@ class Economy:
         # This attribute is eventually "filled" within the apply_first_best_closure method
         self.a_G = None
 
+        # This attribute is eventually "filled" within the initiate_macro_shock method
+        self.severe_outcome_mu_G = None
+
+        # These two attributes will eventually be "filled" when analysing the consequences of a macroeconomic shock
+        self.first_best_threshold_under_shock = None
+        self.capital_requirements_threshold_under_shock = None
+
     def get_one_bank(self, x_0=10):
         """
         This method allows to instantiate a bank, using economy-wide parameters.
@@ -260,11 +268,11 @@ class Economy:
                            mu_G=self.mu_G, sigma_G=self.sigma_G,
                            mu_B=self.mu_B, sigma_B=self.sigma_B)
 
-    def run_simulation(self, n_banks=100,
-                       lower_x_0=2, upper_x_0=5,
-                       n_periods=200, dt=0.01,
-                       fix_random_state=False,
-                       inplace=True):
+    def run_first_simulation(self, n_banks=100,
+                             lower_x_0=2, upper_x_0=5,
+                             n_periods=200, dt=0.01,
+                             fix_random_state=False,
+                             inplace=True):
         """
         This method is the core simulation method provided by the Economy class.
 
@@ -315,6 +323,9 @@ class Economy:
         # It will be reused later on, eg. in apply_first_best_closure and apply_capital_requirements methods
         self.util = [f'cf_{i}' for i in range(n_periods)]
 
+        # This attribute stores the timestep chosen for the simulation and will be reused for post-shock simulations
+        self.dt = dt
+
         # We create the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
         ids = np.arange(1, n_banks + 1)
 
@@ -346,8 +357,8 @@ class Economy:
             # As before, but this time without specifying any random seed, we generate initial cash flow levels
             x_0s = np.random.uniform(lower_x_0, upper_x_0, size=len(ids))
 
-            # We iterate over bank IDs and the array containing the different initial cash flow levels (same length)
-            for i, x_0 in zip(ids, x_0s):
+            # We iterate over the array containing the different initial cash flow levels
+            for x_0 in x_0s:
                 # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
                 bank = self.get_one_bank(x_0=x_0)
 
@@ -382,7 +393,7 @@ class Economy:
         if inplace:
             self.simulation = df   # simulation attribute of the Economy instance is updated
         else:
-            return df.set_index('bank_id')   # The attribute is left unchanged and the output is directly returned
+            return df   # The attribute is left unchanged and the output is directly returned
 
     def apply_first_best_closure(self, inplace=True, verbose=1):
         """
@@ -409,13 +420,13 @@ class Economy:
         - verbose: determines whether to print or not a message indicating that the attributes have been updated.
         """
 
-        # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
+        # We first run a check to verify that a simulation has been run and stored in the related attribute beforehand
         if self.simulation is None:
             raise Exception('You need to first run a simulation before applying first-best closure.')
 
         # We use the formula detailed at page 139 of the paper to compute a_G based on economy parameters
-        self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
-            np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+        # In practice, we use the get_a_exponent function that reproduces the formula in utils.py
+        self.a_G = get_a_exponent(mu=self.mu_G, sigma=self.sigma_G, r=self.r)
 
         # We deduce the first-best closure threshold
         threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
@@ -430,7 +441,7 @@ class Economy:
             if verbose:
                 print('Simulation attribute (DataFrame) updated with the first-best closure column.')
 
-        if not inplace:
+        else:
             # The attribute is left unchanged and the output is directly returned
             df = self.simulation.copy()
             df['first_best_closure'] = df.apply(lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1)
@@ -466,22 +477,20 @@ class Economy:
         - verbose: determines whether to print or not a message indicating that the attributes have been updated.
         """
 
-        # We first run a check to verify that a simulation has been run and stored the related attribute beforehand
+        # We first run a check to verify that a simulation has been run and stored in the related attribute beforehand
         if self.simulation is None:
             raise Exception('You need to first run a simulation before applying capital requirements.')
 
         # In case the apply_first_best_closure method has not been run before calling the one considered here,
         # we need to recompute a_G based on economy parameters and thanks to the formula at page 139 of the paper
         if self.a_G is None:
-            self.a_G = (1 / 2) + (self.mu_G / (self.sigma_G ** 2)) +\
-                np.sqrt(((self.mu_G / (self.sigma_G ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_G ** 2))
+            self.a_G = get_a_exponent(mu=self.mu_G, sigma=self.sigma_G, r=self.r)
 
         # We compute two components of the final formula related to the bad asset monitoring technology (1/2)
         self.nu_B = 1 / (self.r - self.mu_B)
 
         # We compute two components of the final formula related to the bad asset monitoring technology (2/2)
-        self.a_B = (1 / 2) + (self.mu_B / (self.sigma_B ** 2)) +\
-            np.sqrt(((self.mu_B / (self.sigma_B ** 2)) - (1 / 2)) ** 2 + (2 * self.r) / (self.sigma_B ** 2))
+        self.a_B = get_a_exponent(mu=self.mu_B, sigma=self.sigma_B, r=self.r)
 
         # Again based on Proposition 2 of the paper (page 143), we verify capital requirements are needed in our case
         if self.b <= (self.r * (self.a_G * self.nu_G - self.a_B * self.nu_B) - (self.a_G - self.a_B)) / (self.a_G - 1):
@@ -504,7 +513,7 @@ class Economy:
             if verbose:
                 print('Simulation attribute (DataFrame) updated with the second-best closure column.')
 
-        if not inplace:
+        else:
             # The attribute is left unchanged and the output is directly returned
             df = self.simulation.copy()
             df['capital_requirements_closure'] = df.apply(
@@ -516,3 +525,413 @@ class Economy:
                 print('Simulation attribute was left unchanged (inplace=False was passed).')
 
             return df
+
+    def initiate_macro_shock(self,
+                             severe_outcome_mu_G, severe_outcome_sigma_G,
+                             severe_outcome_mu_B, severe_outcome_sigma_B,
+                             light_outcome_mu_G, light_outcome_sigma_G,
+                             light_outcome_mu_B, light_outcome_sigma_B,
+                             severe_outcome_proba=0.2,
+                             verbose=1):
+        # We first run a check to verify that a simulation has been run and stored in the related attribute beforehand
+        if self.simulation is None:
+            raise Exception('You need to run a first simulation before initiating a macroeconomic shock.')
+
+        # We store the probability of the most severe macroeconomic shock among the attributes of the Economy instance
+        self.severe_outcome_proba = severe_outcome_proba
+
+        # We add to the object attributes the parameters of the good and bad technology motions in case of severe shock
+        self.severe_outcome_mu_G = severe_outcome_mu_G
+        self.severe_outcome_sigma_G = severe_outcome_sigma_G
+        self.severe_outcome_mu_B = severe_outcome_mu_B
+        self.severe_outcome_sigma_B = severe_outcome_sigma_B
+
+        # We add to the object attributes the parameters of the good and bad technology motions in case of light shock
+        self.light_outcome_mu_G = light_outcome_mu_G
+        self.light_outcome_sigma_G = light_outcome_sigma_G
+        self.light_outcome_mu_B = light_outcome_mu_B
+        self.light_outcome_sigma_B = light_outcome_sigma_B
+
+        # We compute and store as attributes several scalars defined in the paper, which will prove useful later on
+        # First, in the case of a severe outcome
+        self.severe_outcome_nu_G = 1 / (self.r - severe_outcome_mu_G)
+        self.severe_outcome_a_G = get_a_exponent(mu=severe_outcome_mu_G, sigma=severe_outcome_sigma_G, r=self.r)
+        self.severe_outcome_nu_B = 1 / (self.r - severe_outcome_mu_B)
+        self.severe_outcome_a_B = get_a_exponent(mu=severe_outcome_mu_B, sigma=severe_outcome_sigma_B, r=self.r)
+        # Then, in the case of a light outcome
+        self.light_outcome_nu_G = 1 / (self.r - light_outcome_mu_G)
+        self.light_outcome_a_G = get_a_exponent(mu=light_outcome_mu_G, sigma=light_outcome_sigma_G, r=self.r)
+        self.light_outcome_nu_B = 1 / (self.r - light_outcome_mu_B)
+        self.light_outcome_a_B = get_a_exponent(mu=light_outcome_mu_B, sigma=light_outcome_sigma_B, r=self.r)
+
+        if verbose:
+            print('Macroeconomic shock initiated successfully.')
+
+    def apply_first_best_closure_under_shock(self, strategy='balanced', inplace=True, verbose=1):
+        """
+        in which case the threshold applied is the mean of the severe outcome and the light outcome thresholds
+        in which case it is simply the severe outcome threshold.
+
+
+        """
+        # We run a check to verify that the strategy argument being passed corresponds to one of the two possibilities
+        if strategy not in ['balanced', 'prudent']:
+            raise Exception('The strategy of the regulator can either be "balanced" or "prudent".')
+
+        # We run a check to verify that a first simulation has been run
+        if self.simulation is None:
+            raise Exception('You need to run a first simulation before analysing a macroeconomic shock.')
+
+        # We then run a check to verify that a macroeconomic shock has been initiated
+        if self.severe_outcome_mu_G is None:
+            raise Exception('You need to initiate a macroeconomic shock before you can apply a threshold under shock.')
+
+        # We first need to compute the first-best closure threshold under the severe outcome
+        severe_outcome_threshold = (self.b * (self.severe_outcome_a_G - 1)) / \
+            ((self.severe_outcome_nu_G - self.lambda_parameter) * self.severe_outcome_a_G)
+
+        # We then compute the first-best closure threshold under the light outcome
+        light_outcome_threshold = (self.b * (self.light_outcome_a_G - 1)) / \
+            ((self.light_outcome_nu_G - self.lambda_parameter) * self.light_outcome_a_G)
+
+        # We compute the balanced closure threshold of the regulator, which does not know what outcome is realized
+        self.first_best_threshold_under_shock = self.severe_outcome_proba * severe_outcome_threshold + \
+            (1 - self.severe_outcome_proba) * light_outcome_threshold
+
+        # We determine the threshold eventually applied by the regulator depending on the selected strategy
+        if strategy == 'balanced':
+            threshold = self.first_best_threshold_under_shock
+        else:
+            threshold = severe_outcome_threshold
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation['first_best_closure_under_shock'] =\
+                self.simulation[self.util[-1]].map(lambda x: x <= threshold)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute updated with the first-best closure under shock column.')
+
+        else:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df['first_best_closure_under_shock'] = df[self.util[-1]].map(lambda x: x <= threshold)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute was left unchanged (inplace=False was passed).')
+
+            return df
+
+    def apply_capital_requirements_under_shock(self, strategy='balanced', inplace=True, verbose=1):
+        # We run a check to verify that a first simulation has been run
+        if self.simulation is None:
+            raise Exception('You need to run a first simulation before analysing a macroeconomic shock.')
+
+        # We then run a check to verify that a  macroeconomic shock has been simulated
+        if 'has_shirked_under_shock' not in self.simulation.columns:
+            raise Exception('You need to simulate a macroeconomic shock before you can apply any post shock threshold.')
+
+        # We first compute the second-best / capital requirements closure threshold under the severe outcome
+        severe_outcome_threshold = ((self.severe_outcome_a_G - 1) * self.b + self.severe_outcome_a_G - \
+            self.severe_outcome_a_B) / (self.severe_outcome_a_G * self.severe_outcome_nu_G - \
+            self.severe_outcome_a_B * self.severe_outcome_nu_B)
+
+        # We then compute the second-best / capital requirements closure threshold under the light outcome
+        light_outcome_threshold = ((self.light_outcome_a_G - 1) * self.b + self.light_outcome_a_G - \
+            self.light_outcome_a_B) / (self.light_outcome_a_G * self.light_outcome_nu_G - \
+            self.light_outcome_a_B * self.light_outcome_nu_B)
+
+        # We compute the balanced closure threshold of the regulator, which does not know what outcome is realized
+        self.capital_requirements_threshold_under_shock = self.severe_outcome_proba * severe_outcome_threshold + \
+            (1 - self.severe_outcome_proba) * light_outcome_threshold
+
+        # We determine the threshold eventually applied by the regulator depending on the selected strategy
+        if strategy == 'balanced':
+            threshold = self.capital_requirements_threshold_under_shock
+        else:
+            threshold = severe_outcome_threshold
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation['capital_requirements_closure_under_shock'] =\
+                self.simulation[self.util[-1]].map(lambda x: x <= threshold)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute updated with the capital requirements closure under shock column.')
+
+        else:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df['capital_requirements_closure_under_shock'] = df[self.util[-1]].map(lambda x: x <= threshold)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute was left unchanged (inplace=False was passed).')
+
+            return df
+
+    def simulate_macro_shock(self,
+                             n_periods=200,
+                             fix_random_state=False, selected_outcome=None,
+                             inplace=True):
+        # We first run a check to verify that a  macroeconomic shock has been initiated
+        if self.severe_outcome_mu_G is None:
+            raise Exception('You need to initiate a macroeconomic shock before you can simulate it.')
+
+        # This attribute stores the names of columns that will contain banks' cash flows generated under a macroeconomic
+        # shock in the output DataFrame (for example, from "cf_200" to "cf_399")
+        self.util_bis = [f'cf_{i+len(self.util)}' for i in range(n_periods)]
+
+        # We fetch the list of bank IDs from 1 to n_banks (a NumPy array to be precise)
+        ids = self.simulation.index.values
+
+        # We instantiate void lists that will store cash flows and has_shirked booleans under post-shock conditions
+        all_cash_flows = []
+        has_shirkeds = []
+
+        # x_0's are not generated randomly here; they correspond to the t=(n_periods-1) cash flow level of each bank
+        x_0s = self.simulation[self.util[-1]].values
+
+        if fix_random_state:
+
+            if selected_outcome is None:
+                raise Exception('If you want to fix the random state, you need to specify what outcome gets realised.')
+
+            if selected_outcome == 'severe':
+                # In this case, the severe outcome is realised
+                mu_G = self.severe_outcome_mu_G
+                sigma_G = self.severe_outcome_sigma_G
+                mu_B = self.severe_outcome_mu_B
+                sigma_B = self.severe_outcome_sigma_B
+
+                # We set a coefficient that will be used to fix the random seeds when generating banks' cash flows
+                # Indeed, we do not want the same random state to be used in both "severe" and "light" outcomes
+                coeff = 2
+
+            elif selected_outcome == 'light':
+                # In this case, the light outcome is realised
+                mu_G = self.light_outcome_mu_G
+                sigma_G = self.light_outcome_sigma_G
+                mu_B = self.light_outcome_mu_B
+                sigma_B = self.light_outcome_sigma_B
+
+                # We set the random seed coefficient to a different value than in the "severe" case
+                coeff = 3
+
+            # We iterate over ids and the array containing the different initial cash flow levels (same length)
+            for i, x_0 in zip(ids, x_0s):
+                # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
+                bank = TypicalBank(x_0=x_0,
+                                   b=self.b, r=self.r,
+                                   mu_G=mu_G, sigma_G=sigma_G,
+                                   mu_B=mu_B, sigma_B=sigma_B)
+
+                # We generate the bank's cash flows which are stored in its cash_flows attribute
+                bank.generate_cash_flows(n_periods=(n_periods + 1), dt=self.dt, random_seed=(i + coeff * len(ids)))
+
+                # We append bank's cash flows and the output of the has_shirked method to related objects
+                all_cash_flows.append(bank.cash_flows[1:])
+                has_shirkeds.append(bank.has_shirked())
+
+        else:
+            # We now need to determine what outcome is realised, either the "severe" or the "light" one
+            random_draw = np.random.rand()
+
+            if random_draw < self.severe_outcome_proba:
+                # In this case, the severe outcome is realised
+                mu_G = self.severe_outcome_mu_G
+                sigma_G = self.severe_outcome_sigma_G
+                mu_B = self.severe_outcome_mu_B
+                sigma_B = self.severe_outcome_sigma_B
+
+            elif random_draw >= self.severe_outcome_proba:
+                # In this case, the light outcome is realised
+                mu_G = self.light_outcome_mu_G
+                sigma_G = self.light_outcome_sigma_G
+                mu_B = self.light_outcome_mu_B
+                sigma_B = self.light_outcome_sigma_B
+
+            # We iterate over the array containing the different initial cash flow levels
+            for x_0 in x_0s:
+                # We instantiate a bank (from the TypicalBank class) with initial cash flow level x_0
+                bank = TypicalBank(x_0=x_0,
+                                   b=self.b, r=self.r,
+                                   mu_G=mu_G, sigma_G=sigma_G,
+                                   mu_B=mu_B, sigma_B=sigma_B)
+
+                # We generate the bank's cash flows which are stored in its cash_flows attribute
+                bank.generate_cash_flows(n_periods=(n_periods + 1), dt=self.dt)
+
+                # We append bank's cash flows and the output of the has_shirked method to related objects
+                all_cash_flows.append(bank.cash_flows[1:])
+                has_shirkeds.append(bank.has_shirked())
+
+        # In the end, all_cash_flows is a list of list and we convert this 2-dimensional object into a DataFrame
+        # (all_cash_flows contains n_banks lists of n_periods cash flow levels generated as a geometric Brownian motion)
+        df = pd.DataFrame(all_cash_flows, columns=self.util_bis)
+
+        # We add columns of interest, the second one giving whether the bank has chosen the bad technology at some point
+        # in time during the second simulation, ie. under macroeconomic shock conditions
+        df['bank_id'] = ids
+        df['has_shirked_under_shock'] = has_shirkeds
+
+        # We index the DataFrame by bank IDs
+        df.set_index('bank_id', inplace=True)
+
+        # We compute the positive net present value threshold under the new motion parameters in the economy
+        # (If a bank using the good monitoring technology has a cash flow level below this threshold, then the NPV of
+        # its assets is non-positive as bank's cash flows cannot compensate for the cost of the monitoring technology)
+        nu_G = 1 / (self.r - mu_G)
+        threshold = self.b / (nu_G - self.lambda_parameter)
+
+        # We run a check to identify banks that have reached a negative net present value at some point under the shock
+        df['has_shirked_or_neg_NPV_under_shock'] = df.apply(
+            lambda row: NPV_check(
+                row=row, threshold=threshold,
+                under_macro_shock=True, column_indices=self.util_bis
+            ),
+            axis=1
+        )
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation = pd.concat([self.simulation, df], axis=1)
+        else:
+            return df   # The attribute is left unchanged and the output is directly returned
+
+    def apply_first_best_closure_post_shock(self, inplace=True, verbose=1):
+        """
+        TO BE DOCUMENTED.
+        """
+        # We first run a check to verify that the simulation attribute of the Economy instance contains cash flows
+        # simulated under macroeconomic shock conditions thanks to the simulate_macro_shock method
+        if 'has_shirked_under_shock' not in self.simulation.columns:
+            raise Exception('This method requires to have simulated a macroeconomic shock with inplace=True.')
+
+        # We then run a check to verify that the first-best closure threshold under shock has been computed and stored
+        if self.first_best_threshold_under_shock is None:
+            raise Exception('This method requires to first run the apply_first_best_closure_under_shock method.')
+
+        # We fetch the corresponding threshold from the attributes of the Economy instance
+        threshold = self.first_best_threshold_under_shock
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation['first_best_closure_post_shock'] =\
+                self.simulation.apply(lambda row: (row.loc[self.util_bis] <= threshold).sum() > 0, axis=1)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute (DataFrame) updated with the post-shock first-best closure column.')
+
+        else:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df['first_best_closure_post_shock'] = df.apply(
+                lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1
+            )
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute was left unchanged (inplace=False was passed).')
+
+            return df
+
+    def apply_capital_requirements_post_shock(self, inplace=True, verbose=1):
+        """
+        TO BE DOCUMENTED.
+        """
+        # We first run a check to verify that the simulation attribute of the Economy instance contains cash flows
+        # simulated under macroeconomic shock conditions thanks to the simulate_macro_shock method
+        if 'has_shirked_under_shock' not in self.simulation.columns:
+            raise Exception('This method requires to have simulated a macroeconomic shock with inplace=True.')
+
+        # We then run a check to verify that the second-best closure threshold under shock has been computed and stored
+        if self.capital_requirements_threshold_under_shock is None:
+            raise Exception('This method requires to first run the apply_capital_requirements_under_shock method.')
+
+        # We fetch the corresponding threshold from the attributes of the Economy instance
+        threshold = self.capital_requirements_threshold_under_shock
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # simulation attribute of the Economy instance is updated
+            self.simulation['capital_requirements_closure_post_shock'] =\
+                self.simulation.apply(lambda row: (row.loc[self.util_bis] <= threshold).sum() > 0, axis=1)
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute (DataFrame) updated with the post-shock second-best closure column.')
+
+        else:
+            # The attribute is left unchanged and the output is directly returned
+            df = self.simulation.copy()
+            df['capital_requirements_closure_post_shock'] = df.apply(
+                lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1
+            )
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('Simulation attribute was left unchanged (inplace=False was passed).')
+
+            return df
+
+    def plot_simulation(self, n_lines, plot_shock=False):
+        """
+        TO BE DOCUMENTED.
+        """
+        # We run a check to verify that a first simulation has been run
+        if self.simulation is None:
+            raise Exception('You need to run a first simulation before plotting its results.')
+
+        indices = np.random.choice(self.simulation.index, n_lines, replace=False)
+
+        legend_elements = [
+                Line2D([0], [0], color='darkblue', label='Has not shirked'),
+                Line2D([0], [0], color='darkred', label='Has  shirked')
+            ]
+
+        df = self.simulation.loc[indices, :].copy()
+
+        plt.figure(figsize=(20, 12))
+
+        if not plot_shock:
+            colors = df['has_shirked'].map(lambda x: 'darkred' if x else 'darkblue').values
+
+            for y, color in zip(df[self.util].values, colors):
+                plt.plot(np.arange(len(y)), y, color=color)
+
+        else:
+            # We run a check to verify that a macroeconomic shock has been simulated
+            if 'has_shirked_under_shock' not in self.simulation.columns:
+                raise Exception('This method requires to have simulated a macroeconomic shock with inplace=True.')
+
+            colors = df[['has_shirked', 'has_shirked_under_shock']].apply(
+                lambda row: 'darkred' if row.sum() > 0 else 'darkblue',
+                axis=1
+            ).values
+
+            for y, color in zip(df[self.util + self.util_bis].values, colors):
+                plt.plot(np.arange(len(y)), y, color=color)
+
+            plt.axvline(x=200, color='darkgreen')
+
+            legend_elements.append(Line2D([0], [0], color='darkgreen', label='Macroeconomic shock'))
+
+        plt.legend(handles=legend_elements, loc='best', prop={'size': 14})
+        plt.show()
+
+
+
+
+
+
+
+
