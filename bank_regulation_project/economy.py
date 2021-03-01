@@ -630,19 +630,17 @@ class Economy:
         if self.simulation is None:
             raise Exception('You need to run a first simulation before analysing a macroeconomic shock.')
 
-        # We then run a check to verify that a  macroeconomic shock has been simulated
-        if 'has_shirked_under_shock' not in self.simulation.columns:
-            raise Exception('You need to simulate a macroeconomic shock before you can apply any post shock threshold.')
-
         # We first compute the second-best / capital requirements closure threshold under the severe outcome
-        severe_outcome_threshold = ((self.severe_outcome_a_G - 1) * self.b + self.severe_outcome_a_G - \
-            self.severe_outcome_a_B) / (self.severe_outcome_a_G * self.severe_outcome_nu_G - \
-            self.severe_outcome_a_B * self.severe_outcome_nu_B)
+        severe_outcome_threshold = (
+            ((self.severe_outcome_a_G - 1) * self.b + self.severe_outcome_a_G - self.severe_outcome_a_B) /
+            (self.severe_outcome_a_G * self.severe_outcome_nu_G - self.severe_outcome_a_B * self.severe_outcome_nu_B)
+        )
 
         # We then compute the second-best / capital requirements closure threshold under the light outcome
-        light_outcome_threshold = ((self.light_outcome_a_G - 1) * self.b + self.light_outcome_a_G - \
-            self.light_outcome_a_B) / (self.light_outcome_a_G * self.light_outcome_nu_G - \
-            self.light_outcome_a_B * self.light_outcome_nu_B)
+        light_outcome_threshold = (
+            ((self.light_outcome_a_G - 1) * self.b + self.light_outcome_a_G - self.light_outcome_a_B) /
+            (self.light_outcome_a_G * self.light_outcome_nu_G - self.light_outcome_a_B * self.light_outcome_nu_B)
+        )
 
         # We compute the balanced closure threshold of the regulator, which does not know what outcome is realized
         self.capital_requirements_threshold_under_shock = self.severe_outcome_proba * severe_outcome_threshold + \
@@ -778,7 +776,7 @@ class Economy:
         # We add columns of interest, the second one giving whether the bank has chosen the bad technology at some point
         # in time during the second simulation, ie. under macroeconomic shock conditions
         df['bank_id'] = ids
-        df['has_shirked_under_shock'] = has_shirkeds
+        df['has_shirked_post_shock'] = has_shirkeds
 
         # We index the DataFrame by bank IDs
         df.set_index('bank_id', inplace=True)
@@ -790,7 +788,7 @@ class Economy:
         threshold = self.b / (nu_G - self.lambda_parameter)
 
         # We run a check to identify banks that have reached a negative net present value at some point under the shock
-        df['has_shirked_or_neg_NPV_under_shock'] = df.apply(
+        df['has_shirked_or_neg_NPV_post_shock'] = df.apply(
             lambda row: NPV_check(
                 row=row, threshold=threshold,
                 under_macro_shock=True, column_indices=self.util_bis
@@ -800,6 +798,12 @@ class Economy:
 
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
+            if 'has_shirked_post_shock' in self.simulation.columns:
+                self.simulation.drop(
+                    columns=(self.util_bis + ['has_shirked_post_shock', 'has_shirked_or_neg_NPV_post_shock']),
+                    inplace=True
+                )
+
             # simulation attribute of the Economy instance is updated
             self.simulation = pd.concat([self.simulation, df], axis=1)
         else:
@@ -811,7 +815,7 @@ class Economy:
         """
         # We first run a check to verify that the simulation attribute of the Economy instance contains cash flows
         # simulated under macroeconomic shock conditions thanks to the simulate_macro_shock method
-        if 'has_shirked_under_shock' not in self.simulation.columns:
+        if 'has_shirked_post_shock' not in self.simulation.columns:
             raise Exception('This method requires to have simulated a macroeconomic shock with inplace=True.')
 
         # We then run a check to verify that the first-best closure threshold under shock has been computed and stored
@@ -820,6 +824,9 @@ class Economy:
 
         # We fetch the corresponding threshold from the attributes of the Economy instance
         threshold = self.first_best_threshold_under_shock
+
+        # We print the threshold being applied
+        print(f'Threshold applied is: {round(threshold, 2)}')
 
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
@@ -835,7 +842,7 @@ class Economy:
             # The attribute is left unchanged and the output is directly returned
             df = self.simulation.copy()
             df['first_best_closure_post_shock'] = df.apply(
-                lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1
+                lambda row: (row.loc[self.util_bis] <= threshold).sum() > 0, axis=1
             )
 
             # We print or not the related message depending on the verbose argument
@@ -850,7 +857,7 @@ class Economy:
         """
         # We first run a check to verify that the simulation attribute of the Economy instance contains cash flows
         # simulated under macroeconomic shock conditions thanks to the simulate_macro_shock method
-        if 'has_shirked_under_shock' not in self.simulation.columns:
+        if 'has_shirked_post_shock' not in self.simulation.columns:
             raise Exception('This method requires to have simulated a macroeconomic shock with inplace=True.')
 
         # We then run a check to verify that the second-best closure threshold under shock has been computed and stored
@@ -859,6 +866,9 @@ class Economy:
 
         # We fetch the corresponding threshold from the attributes of the Economy instance
         threshold = self.capital_requirements_threshold_under_shock
+
+        # We print the threshold being applied
+        print(f'Threshold applied is: {round(threshold, 2)}')
 
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
@@ -874,7 +884,7 @@ class Economy:
             # The attribute is left unchanged and the output is directly returned
             df = self.simulation.copy()
             df['capital_requirements_closure_post_shock'] = df.apply(
-                lambda row: (row.loc[self.util] <= threshold).sum() > 0, axis=1
+                lambda row: (row.loc[self.util_bis] <= threshold).sum() > 0, axis=1
             )
 
             # We print or not the related message depending on the verbose argument
@@ -894,9 +904,9 @@ class Economy:
         indices = np.random.choice(self.simulation.index, n_lines, replace=False)
 
         legend_elements = [
-                Line2D([0], [0], color='darkblue', label='Has not shirked'),
-                Line2D([0], [0], color='darkred', label='Has  shirked')
-            ]
+            Line2D([0], [0], color='darkblue', label='Has not shirked'),
+            Line2D([0], [0], color='darkred', label='Has  shirked')
+        ]
 
         df = self.simulation.loc[indices, :].copy()
 
@@ -910,10 +920,10 @@ class Economy:
 
         else:
             # We run a check to verify that a macroeconomic shock has been simulated
-            if 'has_shirked_under_shock' not in self.simulation.columns:
+            if 'has_shirked_post_shock' not in self.simulation.columns:
                 raise Exception('This method requires to have simulated a macroeconomic shock with inplace=True.')
 
-            colors = df[['has_shirked', 'has_shirked_under_shock']].apply(
+            colors = df[['has_shirked', 'has_shirked_post_shock']].apply(
                 lambda row: 'darkred' if row.sum() > 0 else 'darkblue',
                 axis=1
             ).values
@@ -927,11 +937,3 @@ class Economy:
 
         plt.legend(handles=legend_elements, loc='best', prop={'size': 14})
         plt.show()
-
-
-
-
-
-
-
-

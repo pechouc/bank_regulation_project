@@ -93,7 +93,7 @@ def NPV_check(row, threshold, under_macro_shock=False, column_indices=None):
             return (row.iloc[:-1] <= threshold).sum() > 0
 
     if under_macro_shock:
-        if row['has_shirked_under_shock']:
+        if row['has_shirked_post_shock']:
             return True
         else:
             return (row.loc[column_indices] <= threshold).sum() > 0
