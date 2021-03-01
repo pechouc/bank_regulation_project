@@ -175,7 +175,7 @@ class TypicalBank:
 
 class Economy:
 
-    def __init__(self, b=6, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4, lambda_parameter=2.9, d=1):
+    def __init__(self, b=6, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4, lambda_parameter=2):
         """
         This is the instantiation method for the Economy class.
 
@@ -208,7 +208,7 @@ class Economy:
 
         # This check and the one that follows ensure that there is a form of hierarchy between good and bad technologies
         if mu_G < mu_B:
-            raise Exception('Due to the "hierarchy" between good and the bad technologies, mu_G must be above mu_B.')
+            raise Exception('Due to the "hierarchy" between good and bad technologies, mu_G must be above mu_B.')
 
         if sigma_B < sigma_G:
             raise Exception('Because the bad technology is more risky, sigma_B must be above sigma_G.')
@@ -225,10 +225,10 @@ class Economy:
             raise Exception(error_message)
 
         # This check and the one below are related to the bank's liabilities (detailed at p. 141)
-        if r * d / (r - mu_G) - d <= 0:
+        if r / (r - mu_G) - 1 <= 0:
             raise Exception('When liquidation takes place, the book value of the bank equity must be positive.')
 
-        if r * d * lambda_parameter >= 1:
+        if r * lambda_parameter >= 1:
             raise Exception('Liquidation should not permit the repayment of all deposits, which would not be risky.')
 
         self.b = b
@@ -533,9 +533,109 @@ class Economy:
                              light_outcome_mu_B, light_outcome_sigma_B,
                              severe_outcome_proba=0.2,
                              verbose=1):
+        """
+        This function allows to initiate the analysis and simulation of a macroeconomic shock and its effect on bank
+        regulation challenges or policies. It encompasses three main objectives:
+
+        - running a variety of checks on the parameters of the macroeconomic shock to simulate;
+
+        - storing these as attributes of the Economy instance;
+
+        - running a few computations which are used in the following methods to simulate and analyse the shock.
+
+        It requires several arguments, that we now detail.
+
+        As a macroeconomic shock leads the regulator to make two different assumptions about its consequences on banks'
+        future profitability - the two scenarios respectively corresponding to a "severe" and a "light" outcome -, we
+        need for each of the two outcomes:
+
+        - the instantaneous drift of the geometric Brownian motion associated with the good asset monitoring technology.
+        It is given in the two cases by the severe_outcome_mu_G and light_outcome_mu_G arguments;
+
+        - the instantaneous drift of the geometric Brownian motion associated with the bad asset monitoring technology.
+        It is given in the two cases by the severe_outcome_mu_B and light_outcome_mu_B arguments;
+
+        - the instantaneous variance of the geometric Brownian motion associated with the good technology. It is given
+        in the two cases by the severe_outcome_sigma_G and light_outcome_sigma_G arguments;
+
+        - the instantaneous variance of the geometric Brownian motion associated with the bad technology. It is given in
+        the two cases by the severe_outcome_sigma_B and light_outcome_sigma_B arguments.
+
+        Besides, the method requires two additional arguments:
+
+        - severe_outcome_proba, which corresponds to the probability (float must thus be comprised between 0 and 1) that
+        the severe outcome realizes. It is assumed to be properly evaluated by the regulator;
+
+        - verbose, which is equal to 1 by default, indicates whether to print a confirmation of the shock initiation.
+        """
+
+        # We check that severe_outcome_proba corresponds to a well-defined probability
+        if severe_outcome_proba > 1 or severe_outcome_proba < 0:
+            raise Exception('The probability of the severe outcome must be comprised between 0 and 1.')
+
         # We first run a check to verify that a simulation has been run and stored in the related attribute beforehand
         if self.simulation is None:
             raise Exception('You need to run a first simulation before initiating a macroeconomic shock.')
+
+        # Assumption that needs to hold for most computations in the paper (mentioned p. 137)
+        if self.r <= severe_outcome_mu_G or self.r <= light_outcome_mu_G:
+            raise Exception('The interest rate must be strictly greater than the mu_G paramater in both outcomes.')
+
+        # This check and the one that follows ensure that there is a form of hierarchy between good and bad technologies
+        if severe_outcome_mu_G < severe_outcome_mu_B or light_outcome_mu_G < light_outcome_mu_B:
+            raise Exception(
+                'Due to the "hierarchy" between good and bad technologies, mu_G must be above mu_B in both outcomes.'
+            )
+
+        if severe_outcome_sigma_G > severe_outcome_sigma_B or light_outcome_sigma_G > light_outcome_sigma_B:
+            raise Exception(
+                'Because the bad technology is more risky, sigma_B must be above or equal to sigma_G in both outcomes.'
+            )
+
+        # This check verifies, in both severe and light outcomes, a technical assumption on GBM parameters
+        if (
+            severe_outcome_sigma_G ** 2 >= ((severe_outcome_mu_G + severe_outcome_mu_B) / 2)
+            or light_outcome_sigma_G ** 2 >= ((light_outcome_mu_G + light_outcome_mu_B) / 2)
+        ):
+            raise Exception('Technical assumption must be satisfied in both outcomes (cf. page 138 of the paper).')
+
+        # Assumption on the lambda parameter - Severe outcome
+        severe_outcome_nu_G = 1 / (self.r - severe_outcome_mu_G)
+        severe_outcome_nu_B = 1 / (self.r - severe_outcome_mu_B)
+        if self.lambda_parameter < severe_outcome_nu_B or self.lambda_parameter > severe_outcome_nu_G:
+            error = 'Condition on the lambda parameter is not satisfied in the severe outcome. In this case, '
+            error += f'value must lie between {round(severe_outcome_nu_B, 2)} and {round(severe_outcome_nu_G, 2)}.'
+            raise Exception(error)
+
+        # Assumption on the lambda parameter - Light outcome
+        light_outcome_nu_G = 1 / (self.r - light_outcome_mu_G)
+        light_outcome_nu_B = 1 / (self.r - light_outcome_mu_B)
+        if self.lambda_parameter < light_outcome_nu_B or self.lambda_parameter > light_outcome_nu_G:
+            error = 'Condition on the lambda parameter is not satisfied in the light outcome. In this case, '
+            error += f'value must lie between {round(light_outcome_nu_B, 2)} and {round(light_outcome_nu_G, 2)}.'
+            raise Exception(error)
+
+        # The following two checks are related to the bank's liabilities (detailed at p. 141)
+        if self.r / (self.r - severe_outcome_mu_G) - 1 <= 0:
+            raise Exception(
+                'Severe outcome - When liquidation takes place, the book value of the bank equity must be positive.'
+            )
+
+        if self.r / (self.r - light_outcome_mu_G) - 1 <= 0:
+            raise Exception(
+                'Light outcome - When liquidation takes place, the book value of the bank equity must be positive.'
+            )
+
+        # Should be uncommented and completed if we decide to let the interest rate vary based on the realized outcome
+        # if r * lambda_parameter >= 1:
+        #     raise Exception(
+        #         'Severe outcome - Liquidation cannot permit the repayment of all deposits, which would not be risky.'
+        #     )
+
+        # if r * lambda_parameter >= 1:
+        #     raise Exception(
+        #         'Light outcome - Liquidation cannot permit the repayment of all deposits, which would not be risky.'
+        #     )
 
         # We store the probability of the most severe macroeconomic shock among the attributes of the Economy instance
         self.severe_outcome_proba = severe_outcome_proba
@@ -552,16 +652,16 @@ class Economy:
         self.light_outcome_mu_B = light_outcome_mu_B
         self.light_outcome_sigma_B = light_outcome_sigma_B
 
-        # We compute and store as attributes several scalars defined in the paper, which will prove useful later on
+        # We store as attributes several scalars defined in the paper, which will prove useful later on
         # First, in the case of a severe outcome
-        self.severe_outcome_nu_G = 1 / (self.r - severe_outcome_mu_G)
+        self.severe_outcome_nu_G = severe_outcome_nu_G
         self.severe_outcome_a_G = get_a_exponent(mu=severe_outcome_mu_G, sigma=severe_outcome_sigma_G, r=self.r)
-        self.severe_outcome_nu_B = 1 / (self.r - severe_outcome_mu_B)
+        self.severe_outcome_nu_B = severe_outcome_nu_B
         self.severe_outcome_a_B = get_a_exponent(mu=severe_outcome_mu_B, sigma=severe_outcome_sigma_B, r=self.r)
         # Then, in the case of a light outcome
-        self.light_outcome_nu_G = 1 / (self.r - light_outcome_mu_G)
+        self.light_outcome_nu_G = light_outcome_nu_G
         self.light_outcome_a_G = get_a_exponent(mu=light_outcome_mu_G, sigma=light_outcome_sigma_G, r=self.r)
-        self.light_outcome_nu_B = 1 / (self.r - light_outcome_mu_B)
+        self.light_outcome_nu_B = light_outcome_nu_B
         self.light_outcome_a_B = get_a_exponent(mu=light_outcome_mu_B, sigma=light_outcome_sigma_B, r=self.r)
 
         if verbose:
@@ -896,6 +996,8 @@ class Economy:
     def plot_simulation(self, n_lines, plot_shock=False):
         """
         TO BE DOCUMENTED.
+
+        Docstring and comments in the code below
         """
         # We run a check to verify that a first simulation has been run
         if self.simulation is None:
