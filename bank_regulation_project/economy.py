@@ -28,7 +28,7 @@ from tqdm import tqdm
 # ----------------------------------------------------------------------------------------------------------------------
 # DIVERSE
 
-MONTE_CARLO_SIMULATION_PATH =
+MONTE_CARLO_SIMULATION_PATH = ''
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1175,7 +1175,7 @@ class Economy:
             return df.copy()
 
     def fetch_presaved_monte_carlo_simulation(self):
-
+        return None
 
     def plot_monte_carlo_histograms(self):
         if self.monte_carlo_simulation is None:
