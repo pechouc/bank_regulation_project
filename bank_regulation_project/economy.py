@@ -28,7 +28,8 @@ from tqdm import tqdm
 # ----------------------------------------------------------------------------------------------------------------------
 # DIVERSE
 
-MONTE_CARLO_SIMULATION_PATH = ''
+MONTE_CARLO_SIMULATION_PATH =\
+    'https://raw.githubusercontent.com/pechouc/bank_regulation_project/main/simulations/monte_carlo_output_03_10.csv'
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1174,8 +1175,25 @@ class Economy:
 
             return df.copy()
 
-    def fetch_presaved_monte_carlo_simulation(self):
-        return None
+    def fetch_presaved_monte_carlo_simulation(self, inplace=True, verbose=1):
+        df = pd.read_csv(MONTE_CARLO_SIMULATION_PATH)
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # monte_carlo_simulation attribute of the Economy instance is updated
+            self.monte_carlo_simulation = df.copy()
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('monte_carlo_simulation attribute of the Economy instance was updated (inplace=True passed).')
+
+        else:
+            # The attribute is left unchanged and the output is directly returned
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('monte_carlo_simulation attribute was left unchanged (inplace=False was passed).')
+
+            return df.copy()
 
     def plot_monte_carlo_histograms(self):
         if self.monte_carlo_simulation is None:
