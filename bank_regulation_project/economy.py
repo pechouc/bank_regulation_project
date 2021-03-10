@@ -15,10 +15,20 @@ Details about how the simulations are conceived can be found in the description 
 
 import numpy as np
 import pandas as pd
+
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+import seaborn as sns
 
 from bank_regulation_project.utils import generate_GBM, NPV_check, get_a_exponent
+
+from tqdm import tqdm
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# DIVERSE
+
+MONTE_CARLO_SIMULATION_PATH =
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -925,8 +935,9 @@ class Economy:
         # We fetch the corresponding threshold from the attributes of the Economy instance
         threshold = self.first_best_threshold_under_shock
 
-        # We print the threshold being applied
-        print(f'Threshold applied is: {round(threshold, 2)}')
+        # If verbose=1 was passed, we print the threshold being applied
+        if verbose:
+            print(f'Threshold applied is: {round(threshold, 2)}')
 
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
@@ -967,8 +978,9 @@ class Economy:
         # We fetch the corresponding threshold from the attributes of the Economy instance
         threshold = self.capital_requirements_threshold_under_shock
 
-        # We print the threshold being applied
-        print(f'Threshold applied is: {round(threshold, 2)}')
+        # If verbose=1 was passed, we print the threshold being applied
+        if verbose:
+            print(f'Threshold applied is: {round(threshold, 2)}')
 
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
@@ -1038,4 +1050,140 @@ class Economy:
             legend_elements.append(Line2D([0], [0], color='darkgreen', label='Macroeconomic shock'))
 
         plt.legend(handles=legend_elements, loc='best', prop={'size': 14})
+        plt.show()
+
+    def run_monte_carlo_simulation(self, n_trials=200, inplace=True, verbose=1):
+        '''
+        TO BE DOCUMENTED
+
+        Especially the fact that we only consider "previously sound" banks for under shock and post-shock liquidations.
+        '''
+
+        # We first check that a macroeconomic shock has been initiated so that we have all required parameters
+        if self.severe_outcome_mu_G is None:
+            raise Exception('You need to initiate a macroeconomic shock before you can run Monte-Carlo simulations.')
+
+        results = {
+            'n_have_shirked': [],
+            'n_have_shirked_or_neg_NPV': [],
+            'n_first_best_closures': [],
+            'n_capital_requirements_closure': [],
+            'n_first_best_balanced_closures_under_shock': [],
+            'n_first_best_prudent_closures_under_shock': [],
+            'n_capital_requirements_balanced_closures_under_shock': [],
+            'n_capital_requirements_prudent_closures_under_shock': [],
+            'n_have_shirked_post_shock': [],
+            'n_have_shirked_or_neg_NPV_post_shock': [],
+            'n_first_best_closures_post_shock': [],
+            'n_capital_requirements_closures_post_shock': []
+        }
+
+        for _ in tqdm(range(n_trials)):
+
+            economy = Economy(
+                b=self.b, r=self.r,
+                mu_G=self.mu_G, sigma_G=self.sigma_G,
+                mu_B=self.mu_B, sigma_B=self.sigma_B,
+                lambda_parameter=self.lambda_parameter
+            )
+
+            economy.run_first_simulation(fix_random_state=False)
+
+            results['n_have_shirked'].append(economy.simulation['has_shirked'].sum())
+            results['n_have_shirked_or_neg_NPV'].append(economy.simulation['has_shirked_or_neg_NPV'].sum())
+
+            economy.apply_first_best_closure(verbose=0)
+
+            results['n_first_best_closures'].append(economy.simulation['first_best_closure'].sum())
+
+            economy.apply_capital_requirements(verbose=0)
+
+            results['n_capital_requirements_closure'].append(economy.simulation['capital_requirements_closure'].sum())
+
+            economy.initiate_macro_shock(
+                severe_outcome_mu_G=self.severe_outcome_mu_G,
+                severe_outcome_sigma_G=self.severe_outcome_sigma_G,
+                severe_outcome_mu_B=self.severe_outcome_mu_B,
+                severe_outcome_sigma_B=self.severe_outcome_sigma_B,
+                light_outcome_mu_G=self.light_outcome_mu_G,
+                light_outcome_sigma_G=self.light_outcome_sigma_G,
+                light_outcome_mu_B=self.light_outcome_mu_B,
+                light_outcome_sigma_B=self.light_outcome_sigma_B,
+                verbose=0
+            )
+
+            df = economy.apply_first_best_closure_under_shock(strategy='balanced', inplace=False, verbose=0)
+            df = df[~df['first_best_closure']].copy()
+            results['n_first_best_balanced_closures_under_shock'].append(df['first_best_closure_under_shock'].sum())
+
+            df = economy.apply_first_best_closure_under_shock(strategy='prudent', inplace=False, verbose=0)
+            df = df[~df['first_best_closure']].copy()
+            results['n_first_best_prudent_closures_under_shock'].append(df['first_best_closure_under_shock'].sum())
+
+            df = economy.apply_capital_requirements_under_shock(strategy='balanced', inplace=False, verbose=0)
+            df = df[~df['capital_requirements_closure']].copy()
+            results['n_capital_requirements_balanced_closures_under_shock'].append(
+                df['capital_requirements_closure_under_shock'].sum()
+            )
+
+            df = economy.apply_capital_requirements_under_shock(strategy='prudent', inplace=False, verbose=0)
+            df = df[~df['capital_requirements_closure']].copy()
+            results['n_capital_requirements_prudent_closures_under_shock'].append(
+                df['capital_requirements_closure_under_shock'].sum()
+            )
+
+            if np.random.rand() <= self.severe_outcome_proba:
+                realised_outcome = 'severe'
+            else:
+                realised_outcome = 'light'
+
+            economy.simulate_macro_shock(n_periods=200, fix_random_state=False, selected_outcome=realised_outcome)
+
+            df = economy.simulation[~economy.simulation['has_shirked']].copy()
+            results['n_have_shirked_post_shock'].append(df['has_shirked_post_shock'].sum())
+
+            df = economy.simulation[~economy.simulation['has_shirked_or_neg_NPV']].copy()
+            results['n_have_shirked_or_neg_NPV_post_shock'].append(df['has_shirked_or_neg_NPV_post_shock'].sum())
+
+            df = economy.apply_first_best_closure_post_shock(inplace=False, verbose=0)
+            df = df[~df['first_best_closure']].copy()
+            results['n_first_best_closures_post_shock'].append(df['first_best_closure_post_shock'].sum())
+
+            df = economy.apply_capital_requirements_post_shock(inplace=False, verbose=0)
+            df = df[~df['capital_requirements_closure']].copy()
+            results['n_capital_requirements_closures_post_shock'].append(
+                df['capital_requirements_closure_post_shock'].sum()
+            )
+
+        df = pd.DataFrame.from_dict(results)
+
+        # We output the result, in two different ways depending on the inplace argument
+        if inplace:
+            # monte_carlo_simulation attribute of the Economy instance is updated
+            self.monte_carlo_simulation = df.copy()
+
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('monte_carlo_simulation attribute of the Economy instance was updated (inplace=True passed).')
+
+        else:
+            # The attribute is left unchanged and the output is directly returned
+            # We print or not the related message depending on the verbose argument
+            if verbose:
+                print('monte_carlo_simulation attribute was left unchanged (inplace=False was passed).')
+
+            return df.copy()
+
+    def fetch_presaved_monte_carlo_simulation(self):
+
+
+    def plot_monte_carlo_histograms(self):
+        if self.monte_carlo_simulation is None:
+            raise Exception('You first need to run a Monte-Carlo simulation before plotting its histograms.')
+
+        fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(17, 20))
+
+        for ax, column_name in zip(axes.flatten(), self.monte_carlo_simulation.columns):
+            sns.distplot(self.monte_carlo_simulation[column_name], ax=ax)
+
         plt.show()
