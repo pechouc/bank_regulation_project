@@ -26,7 +26,7 @@ from bank_regulation_project.utils import generate_GBM, NPV_check, get_a_exponen
 
 class TypicalBank:
 
-    def __init__(self, x_0=2, b=4, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4):
+    def __init__(self, x_0, b, r, mu_G, sigma_G, mu_B, sigma_B):
         """
         This is the instantiation method for the TypicalBank class.
 
@@ -175,7 +175,7 @@ class TypicalBank:
 
 class Economy:
 
-    def __init__(self, b=6, r=1.2, mu_G=1, sigma_G=0.3, mu_B=0.8, sigma_B=0.4, lambda_parameter=2):
+    def __init__(self, b, r, mu_G, sigma_G, mu_B, sigma_B, lambda_parameter):
         """
         This is the instantiation method for the Economy class.
 
@@ -255,7 +255,7 @@ class Economy:
         self.first_best_threshold_under_shock = None
         self.capital_requirements_threshold_under_shock = None
 
-    def get_one_bank(self, x_0=10):
+    def get_one_bank(self, x_0):
         """
         This method allows to instantiate a bank, using economy-wide parameters.
 
