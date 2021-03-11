@@ -1088,7 +1088,7 @@ class Economy:
                 lambda_parameter=self.lambda_parameter
             )
 
-            economy.run_first_simulation(n_banks=n_banks,fix_random_state=False)
+            economy.run_first_simulation(n_banks=n_banks, fix_random_state=False)
 
             results['n_have_shirked'].append(economy.simulation['has_shirked'].sum())
             results['n_have_shirked_or_neg_NPV'].append(economy.simulation['has_shirked_or_neg_NPV'].sum())
