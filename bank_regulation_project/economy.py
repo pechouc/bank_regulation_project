@@ -31,8 +31,8 @@ from tqdm import tqdm
 root = 'https://raw.githubusercontent.com/pechouc/bank_regulation_project/main/simulations/'
 
 MONTE_CARLO_SIMULATION_PATHS = {
-    0: root + 'monte_carlo_output_03_10.csv',
-    1: root + 'placeholder'
+    0: root + 'monte_carlo_output_03_10_200_banks.csv',
+    1: root + 'monte_carlo_output_03_11_500_banks.csv'
 }
 
 
@@ -1180,7 +1180,7 @@ class Economy:
             return df.copy()
 
     def fetch_presaved_monte_carlo_simulation(self, file_id, inplace=True, verbose=1):
-        df = pd.read_csv(MONTE_CARLO_SIMULATION_PATH[file_id])
+        df = pd.read_csv(MONTE_CARLO_SIMULATION_PATHS[file_id])
 
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
