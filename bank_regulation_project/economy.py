@@ -1053,7 +1053,7 @@ class Economy:
         plt.legend(handles=legend_elements, loc='best', prop={'size': 14})
         plt.show()
 
-    def run_monte_carlo_simulation(self, n_trials=200, inplace=True, verbose=1):
+    def run_monte_carlo_simulation(self, n_trials=200, n_banks=100, inplace=True, verbose=1):
         '''
         TO BE DOCUMENTED
 
@@ -1088,7 +1088,7 @@ class Economy:
                 lambda_parameter=self.lambda_parameter
             )
 
-            economy.run_first_simulation(fix_random_state=False)
+            economy.run_first_simulation(n_banks=n_banks,fix_random_state=False)
 
             results['n_have_shirked'].append(economy.simulation['has_shirked'].sum())
             results['n_have_shirked_or_neg_NPV'].append(economy.simulation['has_shirked_or_neg_NPV'].sum())
