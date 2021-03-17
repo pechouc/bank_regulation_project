@@ -114,3 +114,24 @@ def get_a_exponent(mu, sigma, r):
     It then computes and returns the scalar used for instance in the computation of regulator's liquidation thresholds.
     """
     return (1 / 2) + (mu / (sigma ** 2)) + np.sqrt(((mu / (sigma ** 2)) - (1 / 2)) ** 2 + (2 * r) / (sigma ** 2))
+
+
+def determine_line_color(row):
+    """
+    This function, used in the plot_simulation method of the Economy class (more precisely when plot_shock=True is
+    passed), allows to determine what color to use to plot the sequence of cash flows of a given bank.
+
+    This choice is based on whether the bank has shirked at some point in time, before or after the macroeconomic shock.
+    """
+
+    # In this first case, the bank has shirked before the macroeconomic shock and the line will be dark red
+    if row['has_shirked']:
+        return 'darkred'
+
+    # In this second case, the bank has shirked after the macroeconomic shock and the line is orange
+    elif row['has_shirked_post_shock']:
+        return 'orange'
+
+    # In this third and final case, the bank has shirked neither before nor after the shock and the line is dark blue
+    else:
+        return 'darkblue'

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import seaborn as sns
 
-from bank_regulation_project.utils import generate_GBM, NPV_check, get_a_exponent
+from bank_regulation_project.utils import generate_GBM, NPV_check, get_a_exponent, determine_line_color
 
 from tqdm import tqdm
 
@@ -684,11 +684,42 @@ class Economy:
 
     def apply_first_best_closure_under_shock(self, strategy='balanced', inplace=True, verbose=1):
         """
-        in which case the threshold applied is the mean of the severe outcome and the light outcome thresholds
-        in which case it is simply the severe outcome threshold.
+        This method allows to compute and apply the first-best closure threshold of the regulator, ie. the one which
+        maximizes the continuation value of banks in the economy, updated with the parameters of the macroeconomic
+        shock (that has to be initiated in the first place).
 
+        As before, it is based on the formula described in Proposition 1 (page 140 of the paper).
 
+        In practice, the first step is to compute this threshold for both the severe outcome and the light outcome that
+        may both actually realize with some probability. Then, depending on the "strategy" passed as argument (more on
+        this below), an aggregated threshold is determined. Eventually, a check is run on the last cash-flow level of
+        each bank to verify whether it is above or below the new closure threshold.
+
+        The method then creates a new column, 'first_best_closure_under_shock', which takes the value:
+
+        - True, if the bank should have been closed based on the new threshold at the time of the shock;
+
+        - False, if not.
+
+        It requires three arguments:
+
+        - strategy: this argument, that can take either "balanced" or "prudent" as value, indicates what method to use
+        when aggregating the severe outcome and light outcome thresholds:
+
+            - "balanced" would correspond to a risk-neutral regulator and in this case, the threshold applied is the
+            mean of the severe and light outcome thresholds,
+
+            - "prudent" would instead correspond to an extremely risk-averse regulator, in which case the severe outcome
+            threshold is directly applied;
+
+        - inplace: this boolean indicates whether to directly update the simulation attribute of the Economy instance
+        (inplace=True) or to return a copy of the simulation DataFrame with the new column (inplace=False). It is set to
+        True by default;
+
+        - verbose, which is equal to 1 by default, indicates whether to print a confirmation of the application of the
+        new closure threshold.
         """
+
         # We run a check to verify that the strategy argument being passed corresponds to one of the two possibilities
         if strategy not in ['balanced', 'prudent']:
             raise Exception('The strategy of the regulator can either be "balanced" or "prudent".')
@@ -710,12 +741,12 @@ class Economy:
             ((self.light_outcome_nu_G - self.lambda_parameter) * self.light_outcome_a_G)
 
         # We compute the balanced closure threshold of the regulator, which does not know what outcome is realized
-        self.first_best_threshold_under_shock = self.severe_outcome_proba * severe_outcome_threshold + \
+        self.first_best_threshold_post_shock = self.severe_outcome_proba * severe_outcome_threshold + \
             (1 - self.severe_outcome_proba) * light_outcome_threshold
 
         # We determine the threshold eventually applied by the regulator depending on the selected strategy
         if strategy == 'balanced':
-            threshold = self.first_best_threshold_under_shock
+            threshold = self.first_best_threshold_post_shock
         else:
             threshold = severe_outcome_threshold
 
@@ -741,9 +772,54 @@ class Economy:
             return df
 
     def apply_capital_requirements_under_shock(self, strategy='balanced', inplace=True, verbose=1):
+        """
+        This method allows to compute and apply the second-best closure threshold of the regulator, ie. the one which is
+        assimilated with a capital requirements ratio in the paper, updated with the parameters of the macroeconomic
+        shock (that has to be initiated in the first place).
+
+        As before, it is based on the formula described in Proposition 2 (page 143 of the paper).
+
+        In practice, the first step is to compute this threshold for both the severe outcome and the light outcome that
+        may both actually realize with some probability. Then, depending on the "strategy" passed as argument (more on
+        this below), an aggregated threshold is determined. Eventually, a check is run on the last cash-flow level of
+        each bank to verify whether it is above or below the new closure threshold.
+
+        The method then creates a new column, 'capital_requirements_closure_under_shock', which takes the value:
+
+        - True, if the bank should have been closed based on the new threshold at the time of the shock;
+
+        - False, if not.
+
+        It requires three arguments:
+
+        - strategy ("balanced" by default): this argument, that can take either "balanced" or "prudent" as value, indi-
+        cates what method to use when aggregating the severe outcome and light outcome thresholds:
+
+            - "balanced" would correspond to a risk-neutral regulator and in this case, the threshold applied is the
+            mean of the severe and light outcome thresholds,
+
+            - "prudent" would instead correspond to an extremely risk-averse regulator, in which case the severe outcome
+            threshold is directly applied.
+
+        - inplace: this boolean indicates whether to directly update the simulation attribute of the Economy instance
+        (inplace=True) or to return a copy of the simulation DataFrame with the new column (inplace=False). It is set to
+        True by default;
+
+        - verbose, which is equal to 1 by default, indicates whether to print a confirmation of the application of the
+        new closure threshold.
+        """
+
+        # We run a check to verify that the strategy argument being passed corresponds to one of the two possibilities
+        if strategy not in ['balanced', 'prudent']:
+            raise Exception('The strategy of the regulator can either be "balanced" or "prudent" (cf. documentation).')
+
         # We run a check to verify that a first simulation has been run
         if self.simulation is None:
             raise Exception('You need to run a first simulation before analysing a macroeconomic shock.')
+
+        # We then run a check to verify that a macroeconomic shock has been initiated
+        if self.severe_outcome_mu_G is None:
+            raise Exception('You need to initiate a macroeconomic shock before you can apply a threshold under shock.')
 
         # We first compute the second-best / capital requirements closure threshold under the severe outcome
         severe_outcome_threshold = (
@@ -758,12 +834,12 @@ class Economy:
         )
 
         # We compute the balanced closure threshold of the regulator, which does not know what outcome is realized
-        self.capital_requirements_threshold_under_shock = self.severe_outcome_proba * severe_outcome_threshold + \
+        self.capital_requirements_threshold_post_shock = self.severe_outcome_proba * severe_outcome_threshold + \
             (1 - self.severe_outcome_proba) * light_outcome_threshold
 
         # We determine the threshold eventually applied by the regulator depending on the selected strategy
         if strategy == 'balanced':
-            threshold = self.capital_requirements_threshold_under_shock
+            threshold = self.capital_requirements_threshold_post_shock
         else:
             threshold = severe_outcome_threshold
 
@@ -792,6 +868,43 @@ class Economy:
                              n_periods=200,
                              fix_random_state=False, selected_outcome=None,
                              inplace=True):
+        """
+        This is the second simulation method provided by the Economy class.
+
+        It builds upon the first simulation of cash flows to pursue each bank's sequence after a macroeconomic shock.
+        A first simulation must have been run and a macroeconomic shock must have been initiated beforehand, respective-
+        ly with the run_first_simulation and initiate_macro_shock methods.
+
+        It requires several arguments:
+
+        - n_periods, the number of periods during which one wants to simulate the banks' cash flows after the shock;
+
+        - fix_random_state, a boolean which indicates whether to fix the random state of the simulation. If it is set to
+        True, the output will be the same from a run to another while the output is allowed to vary if False is passed;
+
+        - selected_outcome, this argument is required if and only if one wants to fix the random state for the simula-
+        tion. Either "severe" or "light" can be passed, determining what set of parameters will be used to generate
+        banks' cash flows under the shock. If a selected_outcome is specified while passing fix_random_state=False, this
+        will have no impact on the simulation and the realized outcome will be determined randomly.
+
+        - inplace, set to True by default, specifies whether to directly update the simulation attribute of the Economy
+        instance (inplace=True) or to return a copy of the simulation DataFrame with the new column (inplace=False).
+
+        It either updates the simulation attribute of the Economy instance or returns a copy with several new columns:
+
+        - n_periods columns (for instance denominated by "cf_200", "cf_399", etc), which store the cash flow levels of
+        each bank at each point in time after the macroeconomic shock;
+
+        - a "has_shirked_post_shock" column which indicates whether the bank has chosen the bad technology at some
+        point in time after the macroeconomic shock or not;
+
+        - and a last "has_shirked_or_neg_NPV_post_shock" which stores booleans. True indicates that the bank has either
+        shirked or reached a negative net present value at some point in time after the shock (which is possible with
+        the good technology when cash flows are insufficient to compensate for the monitoring cost).
+
+        NB: This final column is built using the NPV_check function imported from the utils module.
+        """
+
         # We first run a check to verify that a  macroeconomic shock has been initiated
         if self.severe_outcome_mu_G is None:
             raise Exception('You need to initiate a macroeconomic shock before you can simulate it.')
@@ -810,11 +923,18 @@ class Economy:
         # x_0's are not generated randomly here; they correspond to the t=(n_periods-1) cash flow level of each bank
         x_0s = self.simulation[self.util[-1]].values
 
+        # We distinguish two processes for the simulation depending on the fix_random_state argument
+        # And we first focus on the case where random state is fixed for the output to be the same from a run to another
         if fix_random_state:
 
+            # We run a check to verify that an outcome (either "severe" or "light") has been specified
             if selected_outcome is None:
                 raise Exception('If you want to fix the random state, you need to specify what outcome gets realised.')
 
+            # We store the realized outcome in a dedicated attribute of the Economy instance
+            self.realized_outcome = selected_outcome
+
+            # Based on the selected outcome argument, we determine what parameters to use to generate banks' cash flows
             if selected_outcome == 'severe':
                 # In this case, the severe outcome is realised
                 mu_G = self.severe_outcome_mu_G
@@ -851,11 +971,16 @@ class Economy:
                 all_cash_flows.append(bank.cash_flows[1:])
                 has_shirkeds.append(bank.has_shirked())
 
+        # In this second case, the random state is not fixed the simulation is fully random
         else:
+
             # We now need to determine what outcome is realised, either the "severe" or the "light" one
             random_draw = np.random.rand()
 
             if random_draw < self.severe_outcome_proba:
+                # We store the realized outcome in a dedicated attribute of the Economy instance
+                self.realized_outcome = 'severe'
+
                 # In this case, the severe outcome is realised
                 mu_G = self.severe_outcome_mu_G
                 sigma_G = self.severe_outcome_sigma_G
@@ -863,6 +988,9 @@ class Economy:
                 sigma_B = self.severe_outcome_sigma_B
 
             elif random_draw >= self.severe_outcome_proba:
+                # We store the realized outcome in a dedicated attribute of the Economy instance
+                self.realized_outcome = 'light'
+
                 # In this case, the light outcome is realised
                 mu_G = self.light_outcome_mu_G
                 sigma_G = self.light_outcome_sigma_G
@@ -926,8 +1054,33 @@ class Economy:
 
     def apply_first_best_closure_post_shock(self, inplace=True, verbose=1):
         """
-        TO BE DOCUMENTED.
+        This method applies to banks' post-shock cash-flow levels the first-best closure threshold of the regulator,
+        updated with the parameters of the macroeconomic shock.
+
+        Assumingly, the regulator uses, in the n_periods after the shock, the balanced first-best closure threshold that
+        has been computed and stored in the attributes of the Economy instance within the apply_first_best_closure_-
+        under_shock method (which therefore has to be run in the first place).
+
+        In this method, the first step is thus to fetch the relevant threshold from pre-stored attributes. A check is
+        then run on each bank's post-shock cash-flow levels to verify whether they have gone below the closure threshold
+        at some point in time.
+
+        It then creates a new column, 'first_best_closure_post_shock', which takes the value:
+
+        - True, if the bank should have been closed at some point in time after the shock based on the new threshold;
+
+        - False, if not.
+
+        This method takes two simple arguments:
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified;
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated, as
+        well as the threshold actually applied.
         """
+
         # We first run a check to verify that the simulation attribute of the Economy instance contains cash flows
         # simulated under macroeconomic shock conditions thanks to the simulate_macro_shock method
         if 'has_shirked_post_shock' not in self.simulation.columns:
@@ -937,8 +1090,8 @@ class Economy:
         if self.first_best_threshold_under_shock is None:
             raise Exception('This method requires to first run the apply_first_best_closure_under_shock method.')
 
-        # We fetch the corresponding threshold from the attributes of the Economy instance
-        threshold = self.first_best_threshold_under_shock
+        # We fetch the threshold to apply from the attributes of the Economy instance
+        threshold = self.first_best_threshold_post_shock
 
         # If verbose=1 was passed, we print the threshold being applied
         if verbose:
@@ -969,8 +1122,33 @@ class Economy:
 
     def apply_capital_requirements_post_shock(self, inplace=True, verbose=1):
         """
-        TO BE DOCUMENTED.
+        This method applies to banks' post-shock cash-flow levels the second-best or capital requirements closure
+        threshold of the regulator, updated with the parameters of the macroeconomic shock.
+
+        Assumingly, the regulator uses, in the n_periods after the shock, the balanced capital requirements closure
+        threshold that has been computed and stored in the attributes of the Economy instance within the apply_capital_-
+        requirements_under_shock method (which therefore has to be run in the first place).
+
+        In this method, the first step is thus to fetch the relevant threshold from pre-stored attributes. A check is
+        then run on each bank's post-shock cash-flow levels to verify whether they have gone below the closure threshold
+        at some point in time.
+
+        It then creates a new column, 'capital_requirements_closure_post_shock', which takes the value:
+
+        - True, if the bank should have been closed at some point in time after the shock based on the new threshold;
+
+        - False, if not.
+
+        This method takes two simple arguments:
+
+        - inplace: boolean to indicate whether to store the output in the simulation attribute of the Economy instance
+        without returning anything (True) or to return the output instead (False). In the latter case, simulation attri-
+        bute is not modified;
+
+        - verbose: determines whether to print or not a message indicating that the attributes have been updated, as
+        well as the threshold actually applied.
         """
+
         # We first run a check to verify that the simulation attribute of the Economy instance contains cash flows
         # simulated under macroeconomic shock conditions thanks to the simulate_macro_shock method
         if 'has_shirked_post_shock' not in self.simulation.columns:
@@ -980,8 +1158,8 @@ class Economy:
         if self.capital_requirements_threshold_under_shock is None:
             raise Exception('This method requires to first run the apply_capital_requirements_under_shock method.')
 
-        # We fetch the corresponding threshold from the attributes of the Economy instance
-        threshold = self.capital_requirements_threshold_under_shock
+        # We fetch the threshold to apply from the attributes of the Economy instance
+        threshold = self.capital_requirements_threshold_post_shock
 
         # If verbose=1 was passed, we print the threshold being applied
         if verbose:
@@ -1012,9 +1190,20 @@ class Economy:
 
     def plot_simulation(self, n_lines, plot_shock=False):
         """
-        TO BE DOCUMENTED.
+        This function allows to plot the output of pre-shock and post-shock simulations of banks' cash flows.
 
-        Docstring and comments in the code below
+        Based on the results stored in the simulation attribute of the Economy instance, it returns a simple line plot
+        of the cash flow sequences of a sub-sample of banks, chosen randomly. The color of the line is determined by the
+        bank's choice of technology before or after the macroeconomic shock.
+
+        This method requires two arguments:
+
+        - n_lines (no default value), which determines how many cash flow sequences one wants to visualize. From there,
+        the method will draw without replacement n_lines banks from the simulation and display their results;
+
+        - plot_shock is a boolean that indicates whether to plot only cash flows before the macroeconomic shock or both
+        pre-shock and post-shock sequences. Indeed, the form of the graph (as described below) differs beween these two
+        cases. Naturally, to pass plot_shock=True, it is necessary to simulate a macroeconomic shock in the first place.
         """
         # We run a check to verify that a first simulation has been run
         if self.simulation is None:
@@ -1022,52 +1211,136 @@ class Economy:
 
         indices = np.random.choice(self.simulation.index, n_lines, replace=False)
 
-        legend_elements = [
-            Line2D([0], [0], color='darkblue', label='Has not shirked'),
-            Line2D([0], [0], color='darkred', label='Has  shirked')
-        ]
-
         df = self.simulation.loc[indices, :].copy()
 
         plt.figure(figsize=(20, 12))
 
+        # We distinguish two cases depending on whether we want to plot banks' post-shock cash flows
+        # In this first case, we simply plot pre-shock cash flows
         if not plot_shock:
+            # We build the legend of the graph
+            legend_elements = [
+                Line2D([0], [0], color='darkblue', label='Has not shirked'),
+                Line2D([0], [0], color='darkred', label='Has  shirked')
+            ]
+
+            # Based on whether the bank has shirked or not, we determine what color to use for this bank's cash flows
             colors = df['has_shirked'].map(lambda x: 'darkred' if x else 'darkblue').values
 
+            # We iterate over each bank's cash-flow sequence and over the list of colors
             for y, color in zip(df[self.util].values, colors):
+                # We plot each bank's cash-flow sequence
                 plt.plot(np.arange(len(y)), y, color=color)
 
+        # In this second case, we plot pre-shock and post-shock cash flows
         else:
             # We run a check to verify that a macroeconomic shock has been simulated
             if 'has_shirked_post_shock' not in self.simulation.columns:
                 raise Exception('This method requires to have simulated a macroeconomic shock with inplace=True.')
 
+            # We build the legend of the graph, with two additional fields compared with the previous case
+            legend_elements = [
+                Line2D([0], [0], color='darkblue', label='Has not shirked'),
+                Line2D([0], [0], color='darkred', label='Has  shirked before the shock'),
+                Line2D([0], [0], color='orange', label='Has  shirked after the shock'),
+                Line2D([0], [0], color='darkgreen', label='Macroeconomic shock')
+            ]
+
+            # Relying on the determine_line_color function imported from the utils module and based on whether the bank
+            # has shirked before or after the macroeconomic shock, we determine what color for this bank's cash flows
             colors = df[['has_shirked', 'has_shirked_post_shock']].apply(
-                lambda row: 'darkred' if row.sum() > 0 else 'darkblue',
+                determine_line_color,
                 axis=1
             ).values
 
+            # We iterate over each bank's cash-flow sequence and over the list of colors
             for y, color in zip(df[self.util + self.util_bis].values, colors):
+                # We plot each bank's cash-flow sequence
                 plt.plot(np.arange(len(y)), y, color=color)
 
-            plt.axvline(x=200, color='darkgreen')
+            # We add a vertical line indicating at what point in time the macroeconomic shock occurred
+            plt.axvline(x=len(self.util), color='darkgreen')
 
-            legend_elements.append(Line2D([0], [0], color='darkgreen', label='Macroeconomic shock'))
-
+        # We add the legend to the graph
         plt.legend(handles=legend_elements, loc='best', prop={'size': 14})
+
+        # We return the graph
         plt.show()
 
     def run_monte_carlo_simulation(self, n_trials=200, n_banks=100, inplace=True, verbose=1):
         '''
-        TO BE DOCUMENTED
+        This is the third and final simulation method provided by the Economy class.
 
-        Especially the fact that we only consider "previously sound" banks for under shock and post-shock liquidations.
+        This method allows to run Monte-Carlo simulations of the model, in the sense that a large number of Economy in-
+        stances are created, so as to run multiple random simulations and draw aggregate results from there.
+
+        As such, this method requires a macroeconomic shock to have been initiated beforehand as the same "normal
+        state", severe outcome and light outcome parameters will be used throughout the different trials.
+
+        Four arguments are necessary:
+
+        - n_trials (200 by default), which determines how many Economy instances are created and therefore, how many si-
+        mulations will be run;
+
+        - n_banks (100 by default), which determines how many banks will be simulated in each Economy instance;
+
+        - inplace (True by default), which indicates whether to store the output in the monte_carlo_simulation attribute
+        of the Economy instance without returning anything (True) or to return the output instead (False);
+
+        - verbose (1 by default), which determines whether to print or not a message indicating that the attributes have
+        been updated, as well as the threshold actually applied.
+
+        The output of this method is a DataFrame which contains one line for each trial and the following columns:
+
+        - n_have_shirked: number of banks having shirked before the macroeconomic shock;
+
+        - n_have_shirked_or_neg_NPV: number of banks having shirked or reached a negative net present value before the
+        macroeconomic shock;
+
+        - n_first_best_closures: number of banks that should be closed based on the first-best closure threshold of the
+        regulator before the macroeconomic shock;
+
+        - n_capital_requirements_closure: number of banks that should be closed based on the second-best or capital re-
+        quirements closure threshold of the regulator before the macroeconomic shock;
+
+        - n_first_best_balanced_closures_under_shock: number of previously sound banks (in the sense that they were not
+        closed before the macroeconomic shock based on the first-best closure of the regulator) that should be closed
+        based on their cash flow level at the moment of the macroeconomic shock and on the balanced first-best closure
+        threshold of the regulator;
+
+        - n_first_best_prudent_closures_under_shock: number of previously sound banks that should be closed based on
+        their cash flow level at the moment of the macroeconomic shock and on the prudent first-best closure threshold
+        of the regulator;
+
+        - n_capital_requirements_balanced_closures_under_shock: number of previously sound banks (this time referring to
+        the capital requirements closure threshold of the regulator before the shock) that should be closed based on
+        their cash flow level at the moment of the macroeconomic shock and on the balanced capital requirements closure
+        threshold of the regulator;
+
+        - n_capital_requirements_prudent_closures_under_shock: number of previously sound banks that should be closed
+        based on their cash flow level at the moment of the macroeconomic shock and on the prudent capital requirements
+        closure threshold of the regulator;
+
+        - n_have_shirked_post_shock: number of banks, among those that had not shirked before the macroeconomic shock,
+        that have shirked after the shock;
+
+        - n_have_shirked_or_neg_NPV_post_shock: number of banks, among those that had neither shirked nor reached a ne-
+        gative NPV before the macroeconomic shock, that have either shirked or reached a negative NPV after the shock;
+
+        - n_first_best_closures_post_shock: number of previously sound banks (not closed based on the first-best closure
+        threshold of the regulator before the shock) that should be closed after the shock, applying the new balanced
+        first-best closure threshold;
+
+        - n_capital_requirements_closures_post_shock: number of previously sound banks (not closed based on the capital
+        requirements closure threshold of the regulator before the shock) that should be closed after the shock, apply-
+        ing the new balanced capital requirements closure threshold.
         '''
 
         # We first check that a macroeconomic shock has been initiated so that we have all required parameters
         if self.severe_outcome_mu_G is None:
             raise Exception('You need to initiate a macroeconomic shock before you can run Monte-Carlo simulations.')
 
+        # We instantiate the dictionary that will store results of the simulation
         results = {
             'n_have_shirked': [],
             'n_have_shirked_or_neg_NPV': [],
@@ -1083,8 +1356,10 @@ class Economy:
             'n_capital_requirements_closures_post_shock': []
         }
 
+        # We add a progress bar to the for loop, indicating remaining computation time
         for _ in tqdm(range(n_trials)):
-
+            # The following describe what happens for each trial
+            # We start by instantiating an economy with the "normal time" parameters
             economy = Economy(
                 b=self.b, r=self.r,
                 mu_G=self.mu_G, sigma_G=self.sigma_G,
@@ -1092,19 +1367,26 @@ class Economy:
                 lambda_parameter=self.lambda_parameter
             )
 
+            # We run a first simulation with the n_banks argument passed to the method
             economy.run_first_simulation(n_banks=n_banks, fix_random_state=False)
 
+            # We deduce how many banks have shirked or reached a negative NPV, storing the relevant results
             results['n_have_shirked'].append(economy.simulation['has_shirked'].sum())
             results['n_have_shirked_or_neg_NPV'].append(economy.simulation['has_shirked_or_neg_NPV'].sum())
 
+            # We apply the first-best closure of the regulator
             economy.apply_first_best_closure(verbose=0)
 
+            # And we store the number of banks being closed
             results['n_first_best_closures'].append(economy.simulation['first_best_closure'].sum())
 
+            # We apply the second-best or capital requirements closure of the regulator
             economy.apply_capital_requirements(verbose=0)
 
+            # And we store the number of banks being closed
             results['n_capital_requirements_closure'].append(economy.simulation['capital_requirements_closure'].sum())
 
+            # We initiate the macroeconomic shock with the same parameters as the initial Economy instance
             economy.initiate_macro_shock(
                 severe_outcome_mu_G=self.severe_outcome_mu_G,
                 severe_outcome_sigma_G=self.severe_outcome_sigma_G,
@@ -1117,49 +1399,56 @@ class Economy:
                 verbose=0
             )
 
+            # We apply the balanced first-best closure threshold of the regulator on impact and store relevant results
             df = economy.apply_first_best_closure_under_shock(strategy='balanced', inplace=False, verbose=0)
             df = df[~df['first_best_closure']].copy()
             results['n_first_best_balanced_closures_under_shock'].append(df['first_best_closure_under_shock'].sum())
 
+            # We apply the prudent first-best closure threshold of the regulator on impact and store relevant results
             df = economy.apply_first_best_closure_under_shock(strategy='prudent', inplace=False, verbose=0)
             df = df[~df['first_best_closure']].copy()
             results['n_first_best_prudent_closures_under_shock'].append(df['first_best_closure_under_shock'].sum())
 
+            # We apply the balanced capital requirements closure threshold of the regulator on impact and store results
             df = economy.apply_capital_requirements_under_shock(strategy='balanced', inplace=False, verbose=0)
             df = df[~df['capital_requirements_closure']].copy()
             results['n_capital_requirements_balanced_closures_under_shock'].append(
                 df['capital_requirements_closure_under_shock'].sum()
             )
 
+            # We apply the prudent capital requirements closure threshold of the regulator on impact and store results
             df = economy.apply_capital_requirements_under_shock(strategy='prudent', inplace=False, verbose=0)
             df = df[~df['capital_requirements_closure']].copy()
             results['n_capital_requirements_prudent_closures_under_shock'].append(
                 df['capital_requirements_closure_under_shock'].sum()
             )
 
-            if np.random.rand() <= self.severe_outcome_proba:
-                realised_outcome = 'severe'
-            else:
-                realised_outcome = 'light'
+            # We simulate post-shock cash flows of the banks
+            economy.simulate_macro_shock(n_periods=200, fix_random_state=False, inplace=True)
 
-            economy.simulate_macro_shock(n_periods=200, fix_random_state=False, selected_outcome=realised_outcome)
-
+            # We deduce how many banks have shirked (after the shock only)
             df = economy.simulation[~economy.simulation['has_shirked']].copy()
             results['n_have_shirked_post_shock'].append(df['has_shirked_post_shock'].sum())
 
+            # We deduce how many banks have shirked or reached a negative NPV (after the shock only)
             df = economy.simulation[~economy.simulation['has_shirked_or_neg_NPV']].copy()
             results['n_have_shirked_or_neg_NPV_post_shock'].append(df['has_shirked_or_neg_NPV_post_shock'].sum())
 
+            # We apply the balanced first-best closure threshold of the regulator on post-shock cash flows
+            # And we store the number of previously sound banks (based on first-best threshold) that should be closed
             df = economy.apply_first_best_closure_post_shock(inplace=False, verbose=0)
             df = df[~df['first_best_closure']].copy()
             results['n_first_best_closures_post_shock'].append(df['first_best_closure_post_shock'].sum())
 
+            # We apply the balanced capital requirements closure threshold of the regulator on post-shock cash flows
+            # And we store the number of previously sound banks (based on second-best threshold) that should be closed
             df = economy.apply_capital_requirements_post_shock(inplace=False, verbose=0)
             df = df[~df['capital_requirements_closure']].copy()
             results['n_capital_requirements_closures_post_shock'].append(
                 df['capital_requirements_closure_post_shock'].sum()
             )
 
+        # We build the DataFrame from results stored in the results dictionary
         df = pd.DataFrame.from_dict(results)
 
         # We output the result, in two different ways depending on the inplace argument
@@ -1180,6 +1469,26 @@ class Economy:
             return df.copy()
 
     def fetch_presaved_monte_carlo_simulation(self, file_id, inplace=True, verbose=1):
+        """
+        Because computations required by the Monte-Carlo simulation can be heavy, this method allows to fetch the re-
+        sults of simulations already run and stored online.
+
+        It requires three arguments:
+
+        - file_id, which indicates what pre-saved simulation results to fetch. Following options are available so far:
+
+            - 0 gives access to a Monte-Carlo simulation run with 250 trials, with 200 banks each;
+
+            - 1 gives access to a Monte-Carlo simulation run with 250 trials, with 500 banks each.
+
+        - inplace (True by default), which indicates whether to store the output in the monte_carlo_simulation attribute
+        of the Economy instance without returning anything (True) or to return the output instead (False);
+
+        - verbose (1 by default), which determines whether to print or not a message indicating that the attributes have
+        been updated, as well as the threshold actually applied.
+        """
+
+        # We read the corresponding csv file (path being given by the dictionary defined above)
         df = pd.read_csv(MONTE_CARLO_SIMULATION_PATHS[file_id])
 
         # We output the result, in two different ways depending on the inplace argument
@@ -1200,12 +1509,25 @@ class Economy:
             return df.copy()
 
     def plot_monte_carlo_histograms(self):
+        """
+        This function allows to plot histograms that describe the results of the Monte-Carlo simulation.
+
+        For each of the columns of the monte_carlo_simulation DataFrame, it returns a histogram of the results, with
+        a kernel density estimation of the probability density function of the variable when it can be computed.
+        """
+
+        # We run a check to verify that a Monte-Carlo simulation has been run in the first place
         if self.monte_carlo_simulation is None:
             raise Exception('You first need to run a Monte-Carlo simulation before plotting its histograms.')
 
+        # We instantiate the figure and the axes for the graphs
         fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(17, 20))
 
+        # We iterate over axes and columns of the monte_carlo_simulation DataFrame
         for ax, column_name in zip(axes.flatten(), self.monte_carlo_simulation.columns):
+
+            # And we plot the histogram and kernel density estimation for the considered column
             sns.distplot(self.monte_carlo_simulation[column_name], ax=ax)
 
+        # We return the graphs
         plt.show()
