@@ -267,8 +267,8 @@ class Economy:
         self.severe_outcome_mu_G = None
 
         # These two attributes will eventually be "filled" when analysing the consequences of a macroeconomic shock
-        self.first_best_threshold_under_shock = None
-        self.capital_requirements_threshold_under_shock = None
+        self.first_best_threshold_post_shock = None
+        self.capital_requirements_threshold_post_shock = None
 
     def get_one_bank(self, x_0):
         """
@@ -1087,7 +1087,7 @@ class Economy:
             raise Exception('This method requires to have simulated a macroeconomic shock with inplace=True.')
 
         # We then run a check to verify that the first-best closure threshold under shock has been computed and stored
-        if self.first_best_threshold_under_shock is None:
+        if self.first_best_threshold_post_shock is None:
             raise Exception('This method requires to first run the apply_first_best_closure_under_shock method.')
 
         # We fetch the threshold to apply from the attributes of the Economy instance
@@ -1155,7 +1155,7 @@ class Economy:
             raise Exception('This method requires to have simulated a macroeconomic shock with inplace=True.')
 
         # We then run a check to verify that the second-best closure threshold under shock has been computed and stored
-        if self.capital_requirements_threshold_under_shock is None:
+        if self.capital_requirements_threshold_post_shock is None:
             raise Exception('This method requires to first run the apply_capital_requirements_under_shock method.')
 
         # We fetch the threshold to apply from the attributes of the Economy instance
