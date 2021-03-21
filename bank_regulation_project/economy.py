@@ -32,7 +32,8 @@ root = 'https://raw.githubusercontent.com/pechouc/bank_regulation_project/main/s
 
 MONTE_CARLO_SIMULATION_PATHS = {
     0: root + 'monte_carlo_output_03_10_200_banks.csv',
-    1: root + 'monte_carlo_output_03_11_500_banks.csv'
+    1: root + 'monte_carlo_output_03_11_500_banks.csv',
+    2: root + 'monte_carlo_output_03_21_500_banks.csv'
 }
 
 
@@ -1477,9 +1478,15 @@ class Economy:
 
         - file_id, which indicates what pre-saved simulation results to fetch. Following options are available so far:
 
-            - 0 gives access to a Monte-Carlo simulation run with 250 trials, with 200 banks each;
+            - 0 gives access to a Monte-Carlo simulation run with 250 trials, with 200 banks each. The set of paramaters
+            used corresponds to the past calibration (more details can be found in the README file inside the simula-
+            tions folder);
 
-            - 1 gives access to a Monte-Carlo simulation run with 250 trials, with 500 banks each.
+            - 1 gives access to a Monte-Carlo simulation run with 250 trials, with 500 banks each. Here again, the set
+            of parameters corresponds to the first one;
+
+            - 2 gives access to a Monte-Carlo simulaton run with 250 trials, with 500 banks each. The set of parameters
+            used corresponds to the latest version of the calibration.
 
         - inplace (True by default), which indicates whether to store the output in the monte_carlo_simulation attribute
         of the Economy instance without returning anything (True) or to return the output instead (False);
