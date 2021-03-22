@@ -28,7 +28,7 @@ from tqdm import tqdm
 # ----------------------------------------------------------------------------------------------------------------------
 # DIVERSE
 
-root = 'https://raw.githubusercontent.com/pechouc/bank_regulation_project/main/simulations/'
+root = 'https://raw.githubusercontent.com/pechouc/bank_regulation_project/main/simulations/files/'
 
 MONTE_CARLO_SIMULATION_PATHS = {
     0: root + 'monte_carlo_output_03_10_200_banks.csv',
