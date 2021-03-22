@@ -33,7 +33,8 @@ root = 'https://raw.githubusercontent.com/pechouc/bank_regulation_project/main/s
 MONTE_CARLO_SIMULATION_PATHS = {
     0: root + 'monte_carlo_output_03_10_200_banks.csv',
     1: root + 'monte_carlo_output_03_11_500_banks.csv',
-    2: root + 'monte_carlo_output_03_21_500_banks.csv'
+    2: root + 'monte_carlo_output_03_21_500_banks.csv',
+    3: root + 'monte_carlo_output_03_22_500_banks.csv'
 }
 
 
@@ -1322,6 +1323,9 @@ class Economy:
         based on their cash flow level at the moment of the macroeconomic shock and on the prudent capital requirements
         closure threshold of the regulator;
 
+        - realized_outcome: stores the outcome (either "light" or "severe") that randomly realized when simulating the
+        macroeconomic shock;
+
         - n_have_shirked_post_shock: number of banks, among those that had not shirked before the macroeconomic shock,
         that have shirked after the shock;
 
@@ -1351,6 +1355,7 @@ class Economy:
             'n_first_best_prudent_closures_under_shock': [],
             'n_capital_requirements_balanced_closures_under_shock': [],
             'n_capital_requirements_prudent_closures_under_shock': [],
+            'realized_outcome': [],
             'n_have_shirked_post_shock': [],
             'n_have_shirked_or_neg_NPV_post_shock': [],
             'n_first_best_closures_post_shock': [],
@@ -1427,6 +1432,9 @@ class Economy:
             # We simulate post-shock cash flows of the banks
             economy.simulate_macro_shock(n_periods=200, fix_random_state=False, inplace=True)
 
+            # We store the realized outcome in the results dictionary
+            results['realized_outcome'].append(economy.realized_outcome)
+
             # We deduce how many banks have shirked (after the shock only)
             df = economy.simulation[~economy.simulation['has_shirked']].copy()
             results['n_have_shirked_post_shock'].append(df['has_shirked_post_shock'].sum())
@@ -1486,7 +1494,11 @@ class Economy:
             of parameters corresponds to the first one used;
 
             - 2 gives access to a Monte-Carlo simulaton run with 250 trials, with 500 banks each. The set of parameters
-            used corresponds to the latest version of the calibration.
+            used corresponds to the latest version of the calibration;
+
+            - 3 gives access to a Monte-Carlo simulaton run with 250 trials, with 500 banks each. The set of parameters
+            used corresponds to the latest version of the calibration and it includes an additional column, indicating
+            the outcome realized during the simulation of the macroeconomic shock for each trial.
 
         - inplace (True by default), which indicates whether to store the output in the monte_carlo_simulation attribute
         of the Economy instance without returning anything (True) or to return the output instead (False);
@@ -1530,8 +1542,11 @@ class Economy:
         # We instantiate the figure and the axes for the graphs
         fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(17, 20))
 
+        # We isolate variables whose distribution we want to plot
+        columns = self.monte_carlo_simulation.drop(columns='realized_outcome').columns
+
         # We iterate over axes and columns of the monte_carlo_simulation DataFrame
-        for ax, column_name in zip(axes.flatten(), self.monte_carlo_simulation.columns):
+        for ax, column_name in zip(axes.flatten(), columns)
 
             # And we plot the histogram and kernel density estimation for the considered column
             sns.distplot(self.monte_carlo_simulation[column_name], ax=ax)
