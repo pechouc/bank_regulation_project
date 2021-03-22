@@ -1483,7 +1483,7 @@ class Economy:
             tions folder);
 
             - 1 gives access to a Monte-Carlo simulation run with 250 trials, with 500 banks each. Here again, the set
-            of parameters corresponds to the first one;
+            of parameters corresponds to the first one used;
 
             - 2 gives access to a Monte-Carlo simulaton run with 250 trials, with 500 banks each. The set of parameters
             used corresponds to the latest version of the calibration.
