@@ -1546,7 +1546,7 @@ class Economy:
         columns = self.monte_carlo_simulation.drop(columns='realized_outcome').columns
 
         # We iterate over axes and columns of the monte_carlo_simulation DataFrame
-        for ax, column_name in zip(axes.flatten(), columns)
+        for ax, column_name in zip(axes.flatten(), columns):
 
             # And we plot the histogram and kernel density estimation for the considered column
             sns.distplot(self.monte_carlo_simulation[column_name], ax=ax)
