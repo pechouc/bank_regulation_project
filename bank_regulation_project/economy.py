@@ -322,8 +322,9 @@ class Economy:
         bute is not modified.
 
         Based on these arguments and using the generate_cash_flows method of TypicalBank instances, this method instan-
-        tiate a number of banks, simulates their cash flows and determines whether they have shirked or their assets
-        have reached a negative net present value at some point in time.
+        tiate a number of banks, simulates their cash flows and determines whether they have shirked or reached a nega-
+        tive surplus at some point in time, ie. the net present value of their assets is lower than the liquidation
+        value of the bank.
 
         It returns a DataFrame:
 
@@ -336,8 +337,8 @@ class Economy:
         point in time or not;
 
         - and a last "has_shirked_or_neg_NPV" which stores booleans. True indicates that the bank has either shirked or
-        reach a negative net present value at some point in time (which is possible with the good technology when cash
-        flows are insufficient to compensate for the monitoring cost).
+        reached a negative surplus at some point in time (which is possible with the good technology when cash flows are
+        insufficient to compensate for the monitoring cost).
 
         NB: This final column is built using the NPV_check function imported from the utils module.
         """
@@ -409,7 +410,7 @@ class Economy:
         self.nu_G = 1 / (self.r - self.mu_G)
         threshold = self.b / (self.nu_G - self.lambda_parameter)
 
-        # We run the check to identify banks that have reached a negative net present value at some point in time
+        # We run the check to identify banks that have reached a negative surplus at some point in time
         df['has_shirked_or_neg_NPV'] = df.apply(lambda row: NPV_check(row, threshold), axis=1)
 
         # We output the result, in two different ways depending on the inplace argument
@@ -923,8 +924,8 @@ class Economy:
         point in time after the macroeconomic shock or not;
 
         - and a last "has_shirked_or_neg_NPV_post_shock" which stores booleans. True indicates that the bank has either
-        shirked or reached a negative net present value at some point in time after the shock (which is possible with
-        the good technology when cash flows are insufficient to compensate for the monitoring cost).
+        shirked or reached a negative surplus at some point in time after the shock (which is possible with the good
+        technology when cash flows are insufficient to compensate for the monitoring cost).
 
         NB: This final column is built using the NPV_check function imported from the utils module.
         """
@@ -1054,7 +1055,7 @@ class Economy:
         nu_G = 1 / (self.r - mu_G)
         threshold = self.b / (nu_G - self.lambda_parameter)
 
-        # We run a check to identify banks that have reached a negative net present value at some point under the shock
+        # We run a check to identify banks that have reached a negative surplus at some point under the shock
         df['has_shirked_or_neg_NPV_post_shock'] = df.apply(
             lambda row: NPV_check(
                 row=row, threshold=threshold,
@@ -1331,8 +1332,8 @@ class Economy:
 
         - n_have_shirked: number of banks having shirked before the macroeconomic shock;
 
-        - n_have_shirked_or_neg_NPV: number of banks having shirked or reached a negative net present value before the
-        macroeconomic shock;
+        - n_have_shirked_or_neg_NPV: number of banks having shirked or reached a negative surplus before the macroecono-
+        mic shock;
 
         - n_first_best_closures: number of banks that should be closed based on the first-best closure threshold of the
         regulator before the macroeconomic shock;
@@ -1365,7 +1366,8 @@ class Economy:
         that have shirked after the shock;
 
         - n_have_shirked_or_neg_NPV_post_shock: number of banks, among those that had neither shirked nor reached a ne-
-        gative NPV before the macroeconomic shock, that have either shirked or reached a negative NPV after the shock;
+        gative surplus before the macroeconomic shock, that have either shirked or reached a negative surplus after the
+        shock;
 
         - n_first_best_closures_post_shock: number of previously sound banks (not closed based on the first-best closure
         threshold of the regulator before the shock) that should be closed after the shock, applying the new balanced
@@ -1411,7 +1413,7 @@ class Economy:
             # We run a first simulation with the n_banks argument passed to the method
             economy.run_first_simulation(n_banks=n_banks, fix_random_state=False)
 
-            # We deduce how many banks have shirked or reached a negative NPV, storing the relevant results
+            # We deduce how many banks have shirked or reached a negative surplus, storing the relevant results
             results['n_have_shirked'].append(economy.simulation['has_shirked'].sum())
             results['n_have_shirked_or_neg_NPV'].append(economy.simulation['has_shirked_or_neg_NPV'].sum())
 
@@ -1474,7 +1476,7 @@ class Economy:
             df = economy.simulation[~economy.simulation['has_shirked']].copy()
             results['n_have_shirked_post_shock'].append(df['has_shirked_post_shock'].sum())
 
-            # We deduce how many banks have shirked or reached a negative NPV (after the shock only)
+            # We deduce how many banks have shirked or reached a negative surplus (after the shock only)
             df = economy.simulation[~economy.simulation['has_shirked_or_neg_NPV']].copy()
             results['n_have_shirked_or_neg_NPV_post_shock'].append(df['has_shirked_or_neg_NPV_post_shock'].sum())
 
@@ -1585,6 +1587,9 @@ class Economy:
 
             # And we plot the histogram and kernel density estimation for the considered column
             sns.distplot(self.monte_carlo_simulation[column_name], ax=ax)
+
+        # We add the title of the figure
+        fig.suptitle('Summary statistics of the Monte-Carlo simulation with 250 trials, each with 500 banks')
 
         # We return the graphs
         plt.show()

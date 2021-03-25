@@ -82,7 +82,7 @@ def NPV_check(row, threshold, under_macro_shock=False, column_indices=None):
     The function returns a boolean:
 
     - True, if the bank has chosen the bad asset monitoring technology at some point in time or if it uses the good te-
-    chnology but its cash flows have gone below the positive NPV threshold;
+    chnology but its cash flows have gone below the positive surplus threshold;
 
     - False, if none of the two conditions is met.
     """
