@@ -171,6 +171,12 @@ class TypicalBank:
 
         # We simply output a lineplot of the bank's cash flows (the x-axis corresponding to periods)
         plt.plot(self.cash_flows)
+
+        plt.xlabel('Period')
+        plt.ylabel('Cash-flow level')
+
+        plt.title("Bank's simulated cash-flows")
+
         plt.show()
 
     def has_shirked(self):
@@ -398,8 +404,8 @@ class Economy:
         df.set_index('bank_id', inplace=True)
 
         # Based on formulas that are detailed in the paper, we compute the positive net present value threshold
-        # (If a bank using the good monitoring technology has a cash flow level below this threshold, then the NPV of
-        # its assets is non-positive as bank's cash flows cannot compensate for the cost of the monitoring technology)
+        # (If a bank using the good monitoring technology has a cash flow level below this threshold, then the economic
+        # surplus that it generates is non-positive and the current state of the bank does not dominate closure)
         self.nu_G = 1 / (self.r - self.mu_G)
         threshold = self.b / (self.nu_G - self.lambda_parameter)
 
@@ -447,6 +453,10 @@ class Economy:
 
         # We deduce the first-best closure threshold
         threshold = (self.b * (self.a_G - 1)) / ((self.nu_G - self.lambda_parameter) * self.a_G)
+
+        # If verbose=1 was passed, we print the threshold being applied
+        if verbose:
+            print(f'Threshold applied is: {round(threshold, 2)}')
 
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
@@ -519,6 +529,10 @@ class Economy:
 
         # We deduce from previous computations the second-best / capital requirements closure threshold
         threshold = ((self.a_G - 1) * self.b + self.a_G - self.a_B) / (self.a_G * self.nu_G - self.a_B * self.nu_B)
+
+        # If verbose=1 was passed, we print the threshold being applied
+        if verbose:
+            print(f'Threshold applied is: {round(threshold, 2)}')
 
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
@@ -752,6 +766,10 @@ class Economy:
         else:
             threshold = severe_outcome_threshold
 
+        # If verbose=1 was passed, we print the threshold being applied
+        if verbose:
+            print(f'Threshold applied is: {round(threshold, 2)}')
+
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
             # simulation attribute of the Economy instance is updated
@@ -844,6 +862,10 @@ class Economy:
             threshold = self.capital_requirements_threshold_post_shock
         else:
             threshold = severe_outcome_threshold
+
+        # If verbose=1 was passed, we print the threshold being applied
+        if verbose:
+            print(f'Threshold applied is: {round(threshold, 2)}')
 
         # We output the result, in two different ways depending on the inplace argument
         if inplace:
@@ -1026,9 +1048,9 @@ class Economy:
         # We index the DataFrame by bank IDs
         df.set_index('bank_id', inplace=True)
 
-        # We compute the positive net present value threshold under the new motion parameters in the economy
-        # (If a bank using the good monitoring technology has a cash flow level below this threshold, then the NPV of
-        # its assets is non-positive as bank's cash flows cannot compensate for the cost of the monitoring technology)
+        # Based on formulas that are detailed in the paper, we compute the positive net present value threshold
+        # (If a bank using the good monitoring technology has a cash flow level below this threshold, then the economic
+        # surplus that it generates is non-positive and the current state of the bank does not dominate closure)
         nu_G = 1 / (self.r - mu_G)
         threshold = self.b / (nu_G - self.lambda_parameter)
 
@@ -1234,6 +1256,9 @@ class Economy:
                 # We plot each bank's cash-flow sequence
                 plt.plot(np.arange(len(y)), y, color=color)
 
+            # We define the title of the graph
+            title = "Pre-shock cash-flows of 20 banks selected randomly"
+
         # In this second case, we plot pre-shock and post-shock cash flows
         else:
             # We run a check to verify that a macroeconomic shock has been simulated
@@ -1262,6 +1287,16 @@ class Economy:
 
             # We add a vertical line indicating at what point in time the macroeconomic shock occurred
             plt.axvline(x=len(self.util), color='darkgreen')
+
+            # And we define the title of the graph
+            title = "Pre- and post-shock cash-flows of 20 banks selected randomly"
+
+        # Adding labels to graph axes
+        plt.xlabel('Period')
+        plt.ylabel('Cash-flow level')
+
+        # We add the title to the graph
+        plt.title(title)
 
         # We add the legend to the graph
         plt.legend(handles=legend_elements, loc='best', prop={'size': 14})
