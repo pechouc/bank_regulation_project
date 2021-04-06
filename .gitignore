@@ -9,4 +9,3 @@ dist/
 groupama/data/base_pno.*
 .DS_Store
 .idea/
-notebooks/
